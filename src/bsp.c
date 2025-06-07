@@ -37,9 +37,9 @@ SPDX-License-Identifier: MIT
 
 /* === Private function declarations =============================================================================== */
 
-void *digits_turn_off(void);
-void *segments_update(uint8_t value);
-void *digit_turn_on(uint8_t digit);
+void digits_turn_off(void);
+void segments_update(uint8_t value);
+void digit_turn_on(uint8_t digit);
 
 /* === Private variable definitions ================================================================================ */
 static const struct screen_driver_s screen_driver = {
@@ -108,7 +108,7 @@ void segments_init(void){
 void digits_turn_off(void) {
     Chip_GPIO_ClearValue(LPC_GPIO_PORT, DIGIT_1_GPIO, DIGIT_1_BIT);
     Chip_GPIO_ClearValue(LPC_GPIO_PORT, SEGMENTS_GPIO, SEGMENTS_MASK);
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO,SEGMET_P_BIT, false);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO,SEGMENT_P_BIT, false);
 }
 void segments_update(uint8_t value) {
     Chip_GPIO_SetValue(LPC_GPIO_PORT, SEGMENTS_GPIO, (value&SEGMENTS_MASK));
