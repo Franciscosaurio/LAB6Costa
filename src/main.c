@@ -57,35 +57,32 @@
 /* === Public function implementation ========================================================= */
 
 int main(void) {
-    
-    digital_output_t led_blue = digital_output_create(LED_2_GPIO, LED_2_BIT);
-    digital_output_t led_red = digital_output_create(LED_1_GPIO, LED_1_BIT);
-
     int divisor  = 0;
-    bool current_state, last_state = false;
+    uint8_t value[4] = {1, 2, 3, 4};
+    board_t board = board_create();
+    screen_write_BCD(board->screen, value, 4);
+    display_flash_digits(board->screen, 0, 3, 50);
+    
+
 
     while (true) {
-        if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT) == 0) {
-            Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, true);
-        } else {
-            Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, false);
-        }
+       // if (digital_input_get_is_active(board->key_push)) {
+        //    digital_output_activate(board->led_blue);
+        //} else {
+        //    digital_output_deactivate(board->led_blue);
+        //}
 
-        /*current_state = (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT) == 0);
-
-
-        
-        if ((current_state) && (!last_state)) {
-            Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_1_GPIO, LED_1_BIT);
+        /*        
+        if (digital_input_was_activated(board->key_toggle)) {
+            digital_output_toggle(board->led_red);
         }
-        last_state = current_state;
-        // reemplazo los if por una llamada a funcion ?
-        if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT) == 0) {
-            Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, true);
+        if (digital_input_get_is_active(board->key_turn_on)) {
+            digital_output_activate(board->led_yellow);
         }
-        if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT) == 0) {
-            Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, false);
-        }*/
+        if( digital_input_get_is_active(board->key_turn_off)) {
+            digital_output_deactivate(board->led_yellow);
+        }
+        */
 
         divisor++;
         if (divisor == 5) {
@@ -94,11 +91,9 @@ int main(void) {
             //digital_output_toggle(led_green);
 
         }
-
-        for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
-                __asm("NOP");
-            }
+        screen_refresh(board->screen);
+        for(int delay=0;delay<25000;delay++) {
+            _asm("NOP");
         }
     }
 }

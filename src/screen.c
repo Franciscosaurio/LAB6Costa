@@ -40,8 +40,12 @@ SPDX-License-Identifier: MIT
 struct screen_s{
     uint8_t digits;
     uint8_t current_digit;
+    uint8_t flashing_from;
+    uint8_t flashing_to;
+    uint8_t flashing_count;
+    uint16_t flashing_frequency;
     screen_driver_t driver;
-    uint8_t value(SCREEN_MAX_DIGITS);
+    uint8_t value[SCREEN_MAX_DIGITS];
 
 }
 
@@ -77,29 +81,23 @@ screen_t screen_create(uint8_t digits, screen_driver_t driver) {
         digits = SCREEN_MAX_DIGITS
         
     }
+    
+    if(self!=NULL){
+        self->digits= digits;
+        self->driver = driver;
+        self->current_digit = 0;
+        self->flashing_count = 0;
+        self->flashing_frecuency = 0;//no importa lo que digan el from y el to, si la frecuencia es 0 no parpadea
+
+    }
+
+    //se elimina en el video 24, consultar
     if(self != NULL) {
         self->digits = digits;
         self->driver=driver;
         self->current_digit = 0;
         digits_init();
         segments_init();
-        /*Chip_GPIO_Clear_Value(LPC_GPIO_PORT, SEGMENTS_GPIO, SEGMENTS_MASK);
-
-        Chip_SCU_PinMuxSet(DIGIT_1_PORT, DIGIT_1_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | DIGIT_1_FUNC);
-        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, DIGIT_1_PIN, DIGIT_1_BIT, true);
-        
-        Chip_SCU_PinMuxSet(DIGIT_2_PORT, DIGIT_2_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | DIGIT_2_FUNC);
-        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, DIGIT_2_PIN, DIGIT_2_BIT, true);
-
-        Chip_SCU_PinMuxSet(DIGIT_3_PORT, DIGIT_3_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | DIGIT_3_FUNC);
-        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, DIGIT_3_PIN, DIGIT_3_BIT, true);
-
-        Chip_SCU_PinMuxSet(DIGIT_4_PORT, DIGIT_4_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | DIGIT_4_FUNC);
-        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, DIGIT_4_PIN, DIGIT_4_BIT, true);
-        */
-        //Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, false);
-        //Chip_GPIO_SetPinState(LPC_GPIO_PORT, DIGITS_GPIO, LED_G_BIT, true);
-        //Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, LED_G_GPIO, LED_G_BIT, true);
     }
     return self;
 }
@@ -118,10 +116,39 @@ void screen_write_BCD(screen_t self, uint8_t value[], uint8_t size){
 }
 
 void screen_refresh(screen_t self){
+    uint8_t segments;
     self->driver->digits_turn_off();
     self->current_digit = (self->current_digit + 1) % self->digits; // Incrementa el digito actual y lo limita al numero de digitos
-    self->driver->segments_update(self->value[self->current_digit]); // Enciende los segmentos correspondientes al digito actual
+    //
+    segments() = self->value[self->current_digit]; // Obtiene los segmentos correspondientes al digito actual
+    if(self->flashing_frecuency !=0){
+        if(self->current_digit ==0){
+            self->flashing_count=(self->flashing_count + 1) %(self->flashing_frequency);
+            //forma implicita de volver a 0 el contador
+        }
+        if(self->flashing_count >= self->flashing_frequency/2){
+            segments=0; 
+            // Si el contador de parpadeo es mayor o igual a la mitad de la frecuencia, apaga los segmentos
+        }
+    }
+    self->driver->segments_update(segments()); // Enciende los segmentos correspondientes al digito actual
     self->driver->digit_turn_on(self->current_digit); // Enciende el digito actual
+
+}
+
+void display_flash_digits(screen_t self, uint8_t from, uint8_t to, uint16_t divisor) {
+    int result=0;
+    if (from > to || from >= SCREEN_MAX_DIGITS || to >= SCREEN_MAX_DIGITS) {
+        result=1; // Error: los indices estan fuera de rango
+    }else if(!self){
+        result=-1; // Error: from es mayor que to
+    } else{
+        self->flashing_from = from;
+        self->flashing_to = to;
+        self->flashing_frequency = 2*divisor; // La frecuencia de parpadeo se establece como el doble del divisor
+        self->flashing_count = 0;
+    }
+    return result;
 }
 
 /* === End of documentation ======================================================================================== */

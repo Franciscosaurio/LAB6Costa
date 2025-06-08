@@ -27,6 +27,7 @@ SPDX-License-Identifier: MIT
 /* === Headers files inclusions ==================================================================================== */
 #include <stdint.h>
 #include <stdbool.h>
+#include "screen.h"
 /* === Header for C++ compatibility ================================================================================ */
 
 #ifdef __cplusplus
@@ -64,7 +65,6 @@ typedef struct screen_driver_s {
  */
 
 typedef struct screen_s * screen_t;
-
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
@@ -75,6 +75,17 @@ screen_t screen_create(uint8_t digits, screen_driver_t driver);
 void screen_write_BCD(screen_t screen, uint8_t value[], uint8_t size);
 
 void screen_refresh(screen_t screen);
+
+/**
+ * @brief funcion para hacer parpadear algunos digitos de la pantalla
+ * 
+ * @param display puntero al despriptor de la pantalla con la que se quiere operar
+ * @param from posicion del primer digito que se quiere hacer parpadear
+ * @param to    posicion del ultimo digito que se quiere hacer parpadear
+ * @param frecuency factor de division de la frecuencia de refresco para el parpadeo
+ */
+void display_flash_digits(screen_t screen, uint8_t from, uint8_t to, uint8_t divisor);
+// la cantidad de veces 
 
 /* === End of conditional blocks =================================================================================== */
 

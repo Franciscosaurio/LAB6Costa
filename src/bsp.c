@@ -50,7 +50,7 @@ static const struct screen_driver_s screen_driver = {
 /* === Public variable definitions ================================================================================= */
 
 /* === Private function definitions ================================================================================ */
-
+// inicializa los 4 digitos del display
 void digits_init(void){
     Chip_SCU_PinMuxSet(DIGIT_1_PORT, DIGIT_1_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | DIGIT_1_FUNC);
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, DIGIT_1_GPIO, DIGIT_1_BIT, false);
@@ -70,7 +70,8 @@ void digits_init(void){
 
 
 }
-
+// inicio los displays de 7 segmentos
+// y el punto decimal
 void segments_init(void){
     Chip_SCU_PinMuxSet(SEGMENT_A_PORT, SEGMENT_A_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | SEGMENT_A_FUNC);
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_A_GPIO, SEGMENT_A_BIT, false);
@@ -118,7 +119,14 @@ void segments_update(uint8_t value) {
 void digit_turn_on(uint8_t digit) {
     Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (1<<(3-digit))&DIGITS_MASK);
 }
-
+// consultar
+void buzz_turn_on(void) {
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, BUZZER_GPIO, BUZZER_BIT, true);
+}
+void buzz_turn_off(void) {
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, BUZZER_GPIO, BUZZER_BIT, false);
+}
+//********************* */
 /* === Public function implementation ============================================================================== */
 board_t board_create(void) {
     struct board_s * board = malloc(sizeof(struct board_s));
