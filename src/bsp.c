@@ -119,7 +119,7 @@ void segments_update(uint8_t value) {
 void digit_turn_on(uint8_t digit) {
     Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (1<<(3-digit))&DIGITS_MASK);
 }
-// consultar
+
 void buzz_turn_on(void) {
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, BUZZER_GPIO, BUZZER_BIT, true);
 }

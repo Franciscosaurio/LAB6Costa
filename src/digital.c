@@ -42,6 +42,7 @@ struct digital_output_s{
     
 
 };
+
 // el fabricante me da las cosas para hacer el toggle
 //si no me las da lo mismo le puedo hacer un toggle
 // tenemos las funciones para hacer set, clear y toggle a nivel fisico
@@ -89,13 +90,12 @@ digital_output_t digital_output_create(uint8_t port, uint8_t pin){
 //sigo creando funciones vacias y despues transportamos las funciones del main adentro
 //de las funciones vacias y veo que siga funcionando
 
-void digital_output_activate(digital_output_t self){
-    
-
+void digital_output_activate(digital_output_t self) {
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, true);
 }
 
-void digital_output_deactivate(digital_output_t self){
-
+void digital_output_deactivate(digital_output_t self) {
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, false);
 }
 
 void digital_output_toggle(digital_output_t self){
@@ -111,17 +111,15 @@ digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted){
         //inicializamos la variable
         self->last_state=false;// digital_input_get_is_active(self); <- ¿cuando usar?// consultar
         
+        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, gpio, bit, false);        
 
     }
     return self;
 }
 
-bool digital_input_get_is_active(digital_input_t self){
-    bool state =true;// llama a la funcion del fabrbicante
-    if(self->inverted){
-        state = !state;
-    }
-    return state;
+bool digital_input_get_is_active(digital_input_t self) {
+    bool state = !Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, self->port, self->pin);
+    return self->inverted ? !state : state;
 }
 
 digital_states_t digital_was_changed(digital_input_t self){
@@ -141,11 +139,14 @@ digital_states_t digital_was_changed(digital_input_t self){
     return result;
 }
 
-bool digital_was_activated(digital_input_t self){
-    return DIGITAL_INPUT_WAS_ACTIVATED==digital_was_changed(self);
+bool digital_was_activated(digital_input_t self) {
+    return (digital_was_changed(self) == DIGITAL_INPUT_WAS_ACTIVATED);
 }
 
+bool digital_was_deactivated(digital_input_t self) {
+    return (digital_was_changed(self) == DIGITAL_INPUT_WAS_DEACTIVATE);
+}
 
-bool digital_was_deactivated(digital_input_t input);
 /* === End of documentation ======================================================================================== */
+
 

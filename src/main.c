@@ -37,8 +37,8 @@
 
 #include "chip.h"
 #include <stdbool.h>
-#include "cia.h"
-#include "digital.h"
+
+#include "bsp.h"
 
 /* === Macros definitions ====================================================================== */
 
@@ -58,42 +58,24 @@
 
 int main(void) {
     int divisor  = 0;
-    uint8_t value[4] = {1, 2, 3, 4};
+    uint8_t value[4] = {0, 1, 2, 3};
     board_t board = board_create();
     screen_write_BCD(board->screen, value, 4);
-    display_flash_digits(board->screen, 0, 3, 50);
+    display_flash_digits(board->screen, 0, 1, 60);
     
 
 
     while (true) {
-       // if (digital_input_get_is_active(board->key_push)) {
-        //    digital_output_activate(board->led_blue);
-        //} else {
-        //    digital_output_deactivate(board->led_blue);
-        //}
-
-        /*        
-        if (digital_input_was_activated(board->key_toggle)) {
-            digital_output_toggle(board->led_red);
-        }
-        if (digital_input_get_is_active(board->key_turn_on)) {
-            digital_output_activate(board->led_yellow);
-        }
-        if( digital_input_get_is_active(board->key_turn_off)) {
-            digital_output_deactivate(board->led_yellow);
-        }
-        */
+       
 
         divisor++;
         if (divisor == 5) {
             divisor = 0;
             
-            //digital_output_toggle(led_green);
-
         }
         screen_refresh(board->screen);
         for(int delay=0;delay<25000;delay++) {
-            _asm("NOP");
+            asm("NOP");
         }
     }
 }

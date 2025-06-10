@@ -28,6 +28,7 @@ SPDX-License-Identifier: MIT
 #include <stdint.h>
 #include <stdbool.h>
 #include "screen.h"
+#include "cia.h"
 /* === Header for C++ compatibility ================================================================================ */
 
 #ifdef __cplusplus
@@ -45,11 +46,11 @@ extern "C" {
 #define SEGMENT_P (1<<7)
 /* === Public data type declarations =============================================================================== */
 
-typedef void(*digits_turn_off)(void);
+typedef void(*digits_turn_off_t)(void);
 
-typedef void(*segments_update)(uint8_t);
+typedef void(*segments_update_t)(uint8_t);
 
-typedef void(*digit_turn_on)(uint8_t);
+typedef void(*digit_turn_on_t)(uint8_t);
 
 typedef struct screen_driver_s {
     digits_turn_off_t digits_turn_off;
@@ -84,7 +85,7 @@ void screen_refresh(screen_t screen);
  * @param to    posicion del ultimo digito que se quiere hacer parpadear
  * @param frecuency factor de division de la frecuencia de refresco para el parpadeo
  */
-void display_flash_digits(screen_t screen, uint8_t from, uint8_t to, uint8_t divisor);
+void display_flash_digits(screen_t screen, uint8_t from, uint8_t to, uint16_t divisor);
 // la cantidad de veces 
 
 /* === End of conditional blocks =================================================================================== */

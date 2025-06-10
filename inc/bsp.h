@@ -33,9 +33,12 @@ extern "C" {
 #endif
 
 /* === Public macros definitions =================================================================================== */
-#include "digital.h"
+#include "cia.h"
 #include "screen.h"
+#include"digital.h"
 /* === Public data type declarations =============================================================================== */
+
+
 
 typedef struct board_s{
     digital_output_t buzzer;

@@ -24,7 +24,7 @@ SPDX-License-Identifier: MIT
 /* === Headers files inclusions ==================================================================================== */
 
 #include "screen.h"
-#include "poncho"
+#include "poncho.h"
 #include<string.h>
 #include <stdlib.h>
 
@@ -47,7 +47,7 @@ struct screen_s{
     screen_driver_t driver;
     uint8_t value[SCREEN_MAX_DIGITS];
 
-}
+};
 
 /* === Private function declarations =============================================================================== */
 
@@ -67,8 +67,8 @@ static const uint8_t IMAGES[10] = {
     SEGMENT_A | SEGMENT_C | SEGMENT_D | SEGMENT_E | SEGMENT_F | SEGMENT_G,                // 6
     SEGMENT_A | SEGMENT_B | SEGMENT_C,                                                   // 7 
     SEGMENT_A | SEGMENT_B | SEGMENT_C | SEGMENT_D | SEGMENT_E | SEGMENT_F | SEGMENT_G,  // 8
-    SEGMENT_A | SEGMENT_B | SEGMENT_C | SEGMENT_D | SEGMENT_F | SEGMENT_G               // 9
-}
+    SEGMENT_A | SEGMENT_B | SEGMENT_C | SEGMENT_D | SEGMENT_F | SEGMENT_G  ,             // 9
+};
     
 
 
@@ -78,7 +78,7 @@ static const uint8_t IMAGES[10] = {
 screen_t screen_create(uint8_t digits, screen_driver_t driver) {
     screen_t self = malloc(sizeof(struct screen_s));
     if (digits > SCREEN_MAX_DIGITS) {
-        digits = SCREEN_MAX_DIGITS
+        digits = SCREEN_MAX_DIGITS;
         
     }
     
@@ -87,19 +87,20 @@ screen_t screen_create(uint8_t digits, screen_driver_t driver) {
         self->driver = driver;
         self->current_digit = 0;
         self->flashing_count = 0;
-        self->flashing_frecuency = 0;//no importa lo que digan el from y el to, si la frecuencia es 0 no parpadea
+        
+        self->flashing_frequency = 0;//no importa lo que digan el from y el to, si la frecuencia es 0 no parpadea
 
     }
-
+    //return self;
     //se elimina en el video 24, consultar
-    if(self != NULL) {
+   /* if(self != NULL) {
         self->digits = digits;
         self->driver=driver;
         self->current_digit = 0;
-        digits_init();
+        digits_init();// declararla como funcion de callback, como el del driver, se debe ecargar el bsp
         segments_init();
     }
-    return self;
+    */return self;
 }
 
 void screen_write_BCD(screen_t self, uint8_t value[], uint8_t size){
@@ -120,24 +121,28 @@ void screen_refresh(screen_t self){
     self->driver->digits_turn_off();
     self->current_digit = (self->current_digit + 1) % self->digits; // Incrementa el digito actual y lo limita al numero de digitos
     //
-    segments() = self->value[self->current_digit]; // Obtiene los segmentos correspondientes al digito actual
-    if(self->flashing_frecuency !=0){
+    segments = self->value[self->current_digit]; // Obtiene los segmentos correspondientes al digito actual
+    //copio lo que deberia ser la imagen 
+    if(self->flashing_frequency !=0){
         if(self->current_digit ==0){
             self->flashing_count=(self->flashing_count + 1) %(self->flashing_frequency);
             //forma implicita de volver a 0 el contador
         }
         if(self->flashing_count >= self->flashing_frequency/2){
-            segments=0; 
+            if(self->current_digit >= self->flashing_from && self->current_digit <= self->flashing_to) {
+                segments = 0; // Si el contador de parpadeo es mayor o igual a la mitad de la frecuencia, apaga los segmentos
+            
+            }
             // Si el contador de parpadeo es mayor o igual a la mitad de la frecuencia, apaga los segmentos
         }
     }
-    self->driver->segments_update(segments()); // Enciende los segmentos correspondientes al digito actual
+    self->driver->segments_update(segments); // Enciende los segmentos correspondientes al digito actual
     self->driver->digit_turn_on(self->current_digit); // Enciende el digito actual
 
 }
 
 void display_flash_digits(screen_t self, uint8_t from, uint8_t to, uint16_t divisor) {
-    int result=0;
+    int result;
     if (from > to || from >= SCREEN_MAX_DIGITS || to >= SCREEN_MAX_DIGITS) {
         result=1; // Error: los indices estan fuera de rango
     }else if(!self){
@@ -148,7 +153,7 @@ void display_flash_digits(screen_t self, uint8_t from, uint8_t to, uint16_t divi
         self->flashing_frequency = 2*divisor; // La frecuencia de parpadeo se establece como el doble del divisor
         self->flashing_count = 0;
     }
-    return result;
+    
 }
 
 /* === End of documentation ======================================================================================== */
