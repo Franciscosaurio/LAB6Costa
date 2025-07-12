@@ -72,8 +72,10 @@ void digits_init(void){
 }
 // inicio los displays de 7 segmentos
 // y el punto decimal
-void segments_init(void){
+void segments_init(void){ 
     Chip_SCU_PinMuxSet(SEGMENT_A_PORT, SEGMENT_A_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | SEGMENT_A_FUNC);
+    // inicializo los digitos, siendo SEGMENT_A_PORT el puerto, SEGMENT_A_PIN el pin, y 
+    //SCU_MODE_INBUFF_EN | SCU_MODE_INACT | SEGMENT_A_FUNC la funcion
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_A_GPIO, SEGMENT_A_BIT, false);
     Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, SEGMENT_A_GPIO, SEGMENT_A_BIT, true);
 
@@ -118,6 +120,8 @@ void segments_update(uint8_t value) {
 
 void digit_turn_on(uint8_t digit) {
     Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (1<<(3-digit))&DIGITS_MASK);
+    // esta funcion setea el valor del gpio de los digitos
+    // el 3-digit es para que el digito 1 sea el bit 0
 }
 
 void buzz_turn_on(void) {
@@ -130,6 +134,7 @@ void buzz_turn_off(void) {
 /* === Public function implementation ============================================================================== */
 board_t board_create(void) {
     struct board_s * board = malloc(sizeof(struct board_s));
+    // esta linea de codigo lo que hace es reservar memoria para la estructura board_s
     if (board!= NULL) {
         digits_init();
         segments_init();

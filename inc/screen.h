@@ -61,7 +61,7 @@ typedef struct screen_driver_s {
 
 
 /**
- * @brief 
+ * @brief Estructura que representa una pantalla de 7 segmentos
  * 
  */
 
@@ -70,11 +70,29 @@ typedef struct screen_s * screen_t;
 
 /* === Public function declarations ================================================================================ */
 
+/**
+ * @brief funcion para crear una pantalla de 7 segmentos
+ * 
+ * @param digits cantidad de digitos que tiene la pantalla
+ * @param driver puntero a la estructura que contiene las funciones de manejo de la pantalla
+ * @return screen_t puntero a la estructura que representa la pantalla
+ */
 screen_t screen_create(uint8_t digits, screen_driver_t driver);
 
-
+/**
+ * @brief funcion para escribir un valor en la pantalla
+ * 
+ * @param screen 
+ * @param value 
+ * @param size 
+ */
 void screen_write_BCD(screen_t screen, uint8_t value[], uint8_t size);
 
+/**
+ * @brief funcion para refrescar la pantalla
+ * 
+ * @param screen 
+ */
 void screen_refresh(screen_t screen);
 
 /**

@@ -35,9 +35,7 @@
 
 /* === Headers files inclusions =============================================================== */
 
-#include "chip.h"
 #include <stdbool.h>
-
 #include "bsp.h"
 
 /* === Macros definitions ====================================================================== */
@@ -58,7 +56,7 @@
 
 int main(void) {
     int divisor  = 0;
-    uint8_t value[4] = {0, 1, 2, 3};
+    uint8_t value[4] = {1, 2, 3, 4};
     board_t board = board_create();
     screen_write_BCD(board->screen, value, 4);
     display_flash_digits(board->screen, 0, 1, 60);
@@ -74,8 +72,10 @@ int main(void) {
             
         }
         screen_refresh(board->screen);
-        for(int delay=0;delay<25000;delay++) {
-            asm("NOP");
+        for (int index = 0; index < 100; index++) {
+            for (int delay = 0; delay < 25000; delay++) {
+                __asm("NOP");
+            }
         }
     }
 }
