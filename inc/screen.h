@@ -36,7 +36,8 @@ extern "C" {
 #endif
 
 /* === Public macros definitions =================================================================================== */
-#define SEGMENT_A (1<<0)
+//defino los pines de los segmentos
+#define SEGMENT_A (1<<0)// el segmento A es el bit 0
 #define SEGMENT_B (1<<1)
 #define SEGMENT_C (1<<2)
 #define SEGMENT_D (1<<3)
@@ -104,8 +105,8 @@ void screen_refresh(screen_t screen);
  * @param frecuency factor de division de la frecuencia de refresco para el parpadeo
  */
 void display_flash_digits(screen_t screen, uint8_t from, uint8_t to, uint16_t divisor);
-// la cantidad de veces 
 
+void screen_add_point(screen_t screen, uint8_t digit);
 /* === End of conditional blocks =================================================================================== */
 
 #ifdef __cplusplus

@@ -38,14 +38,14 @@ SPDX-License-Identifier: MIT
 /* === Private data type declarations ============================================================================== */
 
 struct screen_s{
-    uint8_t digits;
-    uint8_t current_digit;
-    uint8_t flashing_from;
-    uint8_t flashing_to;
-    uint8_t flashing_count;
-    uint16_t flashing_frequency;
-    screen_driver_t driver;
-    uint8_t value[SCREEN_MAX_DIGITS];
+    uint8_t digits;//!< número de dígitos del display>
+    uint8_t current_digit;//!< dígito actual que se está mostrando>
+    uint8_t flashing_from;//!< dígito desde el cual se inicia el parpadeo>
+    uint8_t flashing_to;//!< dígito hasta el cual se inicia el parpadeo>
+    uint8_t flashing_count;//!< contador de parpadeo>
+    uint16_t flashing_frequency;//!< frecuencia de parpadeo en ticks>
+    screen_driver_t driver;//!< puntero al driver de pantalla>
+    uint8_t value[SCREEN_MAX_DIGITS];//!< valor a mostrar en el display>
 
 };
 
@@ -56,7 +56,8 @@ struct screen_s{
 /* === Public variable definitions ================================================================================= */
 
 /* === Private function definitions ================================================================================ */
-// array constante donde esta la traduccion de cada uno
+// array constante donde esta la traduccion de cada uno de los numeros a los segmentos del display
+// cada numero tiene su representacion en segmentos
 static const uint8_t IMAGES[10] = {
     SEGMENT_A | SEGMENT_B | SEGMENT_C | SEGMENT_D | SEGMENT_E | SEGMENT_F,          // 0
     SEGMENT_B | SEGMENT_C,                                                          // 1
@@ -118,11 +119,11 @@ void screen_write_BCD(screen_t self, uint8_t value[], uint8_t size){
 
 void screen_refresh(screen_t self){
     uint8_t segments;
-    self->driver->digits_turn_off();
-    self->current_digit = (self->current_digit + 1) % self->digits; 
+    self->driver->digits_turn_off();// Apaga los dígitos antes de actualizar
+    self->current_digit = (self->current_digit + 1) % self->digits;
     // Incrementa el digito actual y lo limita al numero de digitos
-    //
-    segments = self->value[self->current_digit]; // Obtiene los segmentos correspondientes al digito actual
+    segments = self->value[self->current_digit]; 
+    // Obtiene los segmentos correspondientes al digito actual
     //copio lo que deberia ser la imagen 
     if(self->flashing_frequency !=0){
         if(self->current_digit ==0){
@@ -159,5 +160,13 @@ void display_flash_digits(screen_t self, uint8_t from, uint8_t to, uint16_t divi
     }
     
 }
-
+void screen_add_point(screen_t screen, uint8_t digit){
+    if (digit < screen->digits) {
+        screen->value[digit] |= SEGMENT_P; // Agrega el punto al dígito especificado
+        // SEGMENT_P es una constante que representa el segmento del punto decimal
+    }
+    // Esta funcion agrega un punto decimal al digito especificado
+    // si el digito es mayor que la cantidad de digitos, no hace nada
+    // si el digito es menor que la cantidad de digitos, agrega el punto al dígito especificado
+}
 /* === End of documentation ======================================================================================== */

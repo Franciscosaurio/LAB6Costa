@@ -36,10 +36,10 @@
 /* === Headers files inclusions =============================================================== */
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "bsp.h"
-
 /* === Macros definitions ====================================================================== */
-
+#define TICKS_PER_SECOND 5
 /* === Private data type declarations ========================================================== */
 
 /* === Private variable declarations =========================================================== */
@@ -56,22 +56,23 @@
 
 int main(void) {
     int divisor  = 0;
-    uint8_t value[4] = {1, 2, 3, 4};
     board_t board = board_create();
-    screen_write_BCD(board->screen, value, 4);
-    display_flash_digits(board->screen, 0, 1, 60);
-    
+    clock_t clock = clock_create(TICKS_PER_SECOND);
 
+    // Inicializa la hora a 00:00:00
+    clock_time_t start_time = { .bcd = {0, 0, 0, 0, 0, 0} };
+    clock_set_time(clock, &start_time);  // Asegurate que esta función setea valid = true
 
     while (true) {
-       
-
         divisor++;
         if (divisor == 5) {
             divisor = 0;
-            
+            clock_new_tick(clock);                      // Avanza 1 segundo
+            clock_display_time(clock, board->screen);   // Muestra en pantalla
         }
-        screen_refresh(board->screen);
+
+        screen_refresh(board->screen);  // ¡Muy importante!
+
         for (int index = 0; index < 100; index++) {
             for (int delay = 0; delay < 25000; delay++) {
                 __asm("NOP");
@@ -79,6 +80,8 @@ int main(void) {
         }
     }
 }
+
+
 
 /* === End of documentation ==================================================================== */
 

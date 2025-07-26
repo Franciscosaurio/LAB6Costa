@@ -36,6 +36,7 @@ extern "C" {
 #include "cia.h"
 #include "screen.h"
 #include"digital.h"
+#include "clock.h"
 /* === Public data type declarations =============================================================================== */
 
 

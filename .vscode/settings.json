@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "digital.h": "c"
+        "digital.h": "c",
+        "type_traits": "c"
     }
 }

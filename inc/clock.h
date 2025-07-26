@@ -27,6 +27,7 @@ SPDX-License-Identifier: MIT
 /* === Headers files inclusions ==================================================================================== */
 #include <stdint.h>
 #include <stdbool.h>
+#include "screen.h"
 /* === Header for C++ compatibility ================================================================================ */
 
 #ifdef __cplusplus
@@ -164,6 +165,17 @@ bool clock_alarm_triggered(clock_t clock);
  * @param minutes 
  */
 void clock_snooze_alarm(clock_t clock, uint8_t minutes);
+
+/**
+ * @brief Muestra la hora actual del reloj en la pantalla de 7 segmentos.
+ * 
+ * @param clock Puntero al objeto reloj.
+ * @param screen Puntero al objeto de pantalla.
+ */
+void clock_display_time(clock_t clock, screen_t screen);
+
+
+
 
 /* === End of conditional blocks =================================================================================== */
 

@@ -30,6 +30,7 @@ SPDX-License-Identifier: MIT
 #include "cia.h"
 #include "poncho.h"
 #include <stddef.h>
+#include "clock.h"
 
 /* === Macros definitions ========================================================================================== */
 
@@ -114,7 +115,10 @@ void digits_turn_off(void) {
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO,SEGMENT_P_BIT, false);
 }
 void segments_update(uint8_t value) {
+    //esta fucion actualiza los segmentos del display de la siguiente manera:
+    // 1. Limpia los segmentos
     Chip_GPIO_SetValue(LPC_GPIO_PORT, SEGMENTS_GPIO, (value&SEGMENTS_MASK));
+    // 2. Activa el punto decimal si es necesario
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, (value & SEGMENT_P));
 }    
 
@@ -136,9 +140,10 @@ board_t board_create(void) {
     struct board_s * board = malloc(sizeof(struct board_s));
     // esta linea de codigo lo que hace es reservar memoria para la estructura board_s
     if (board!= NULL) {
+        //si la memoria es distinta de 0 entonces inicializo los digitos y los segmentos
         digits_init();
         segments_init();
-        board->screen = screen_create(4, &screen_driver);
+        board->screen = screen_create(4, &screen_driver);// a board
     }
     return board;
 }

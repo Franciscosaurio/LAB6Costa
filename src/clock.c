@@ -63,8 +63,8 @@ bool clock_time_is_valid(clock_t clock) {
     // Aquí se puede verificar si el reloj tiene un tiempo válido
     //como no lo necesito pero uso un puntero tengo que castear la variable
     //con void le digo que no se usa
-    (void) clock;
-    return false; 
+    if(!clock) return false;
+    return clock->valid;
 }
 bool clock_get_time(clock_t self, clock_time_t *result) {
     if (!self || !result) return false;
@@ -82,19 +82,39 @@ bool clock_set_time(clock_t self, const clock_time_t *new_time){
 
 
 static void bcd_increment(clock_time_t *time) {
+    // Si estamos en 23:59:59
+    if (time->bcd[5] == 2 && time->bcd[4] == 3 &&
+        time->bcd[3] == 5 && time->bcd[2] == 9 &&
+        time->bcd[1] == 5 && time->bcd[0] == 9) {
+        memset(time, 0, sizeof(clock_time_t));
+        return;
+    }
+
+    // Incrementar segundos unidades
     if (++time->bcd[0] > 9) {
         time->bcd[0] = 0;
+
+        // Incrementar segundos decenas
         if (++time->bcd[1] > 5) {
             time->bcd[1] = 0;
+
+            // Incrementar minutos unidades
             if (++time->bcd[2] > 9) {
                 time->bcd[2] = 0;
+
+                // Incrementar minutos decenas
                 if (++time->bcd[3] > 5) {
                     time->bcd[3] = 0;
+
+                    // Incrementar horas unidades
                     if (++time->bcd[4] > 9) {
                         time->bcd[4] = 0;
-                        if (++time->bcd[5] > 2 || (time->bcd[5] == 2 && time->bcd[4] > 3)) {
-                            memset(time, 0, sizeof(clock_time_t));//memset lo que hace es setear a 00:00:00
-                        }
+                        ++time->bcd[5];
+                    }
+
+                    // Si horas decenas quedó en 2, limitar unidades a 3
+                    if (time->bcd[5] == 2 && time->bcd[4] > 3) {
+                        memset(time, 0, sizeof(clock_time_t));
                     }
                 }
             }
@@ -102,6 +122,7 @@ static void bcd_increment(clock_time_t *time) {
     }
 }
 
+/*
 void clock_new_tick(clock_t clock) {
     if (!clock->valid) return;
     clock->tick_count++;
@@ -114,7 +135,54 @@ void clock_new_tick(clock_t clock) {
             clock->alarm_triggered_flag = true;
         }
     }
+}*/
+
+void clock_new_tick(clock_t clock) {
+    if (!clock || !clock->valid) return;
+
+    clock->current_time.bcd[0]++;  // Avanza segundos unidad
+
+    for (int i = 0; i < 6; i++) {
+        if ((clock->current_time.bcd[i] & 0x0F) <= 9) break;
+
+        clock->current_time.bcd[i] = 0;
+
+        switch (i) {
+            case 0:  // segundos unidad → segundos decena
+                clock->current_time.bcd[1]++;
+                break;
+            case 1:  // segundos decena → minutos unidad
+                if (clock->current_time.bcd[1] >= 6) {
+                    clock->current_time.bcd[2]++;
+                }
+                break;
+            case 2:  // minutos unidad → minutos decena
+                clock->current_time.bcd[3]++;
+                break;
+            case 3:  // minutos decena → horas unidad
+                if (clock->current_time.bcd[3] >= 6) {
+                    clock->current_time.bcd[4]++;
+                }
+                break;
+            case 4:  // horas unidad → horas decena
+                clock->current_time.bcd[5]++;
+                break;
+            case 5:  // horas decena (reseteo al llegar a 24:00:00)
+                if ((clock->current_time.bcd[5] > 2) ||
+                    (clock->current_time.bcd[5] == 2 && clock->current_time.bcd[4] >= 4)) {
+                    memset(clock->current_time.bcd, 0, sizeof(clock->current_time.bcd));
+                }
+                break;
+        }
+    }
+
+    // Si la hora coincide con la alarma activa
+    if (clock->alarm_enabled &&
+        memcmp(&clock->current_time, &clock->alarm_time, sizeof(clock_time_t)) == 0) {
+        clock->alarm_triggered_flag = true;
+    }
 }
+
 
 bool clock_set_alarm_time(clock_t clock, const clock_time_t *alarm_time) {
     if (!clock || !alarm_time) return false;
@@ -153,7 +221,8 @@ bool clock_alarm_triggered(clock_t clock) {
 }
 
 void clock_snooze_alarm(clock_t clock, uint8_t minutes) {
-    clock->alarm_triggered_flag = false;
+    clock->alarm_triggered_flag = false;// esta línea desactiva la alarma activada
+    //
     for (uint8_t i = 0; i < minutes; i++) {
         if (++clock->alarm_time.bcd[2] > 9) {
             clock->alarm_time.bcd[2] = 0;
@@ -170,5 +239,13 @@ void clock_snooze_alarm(clock_t clock, uint8_t minutes) {
         }
     }
 }
+
+void clock_display_time(clock_t clock, screen_t screen) {
+    if(!clock || !screen) return;
+    // Verifica si el reloj y la pantalla son válidos
+    // Si alguno de los dos es NULL, no hace nada
+    screen_write_BCD(screen, clock->current_time.bcd,6);
+}
+
 
 /* === End of documentation ======================================================================================== */

@@ -39,8 +39,6 @@ SPDX-License-Identifier: MIT
 struct digital_output_s{
     uint8_t port; /*!< puerto al que pertenece la salida*/
     uint8_t pin; /*!< pin al que pertenece la salida*/
-    
-
 };
 
 // el fabricante me da las cosas para hacer el toggle
@@ -55,8 +53,7 @@ struct digital_input_s{
     uint8_t port; /*!< puerto al que pertenece la entrada*/
     uint8_t pin; /*!< pin al que pertenece la entrada*/
     bool inverted; /*!< estado de la entrada*/
-    bool last_state;
-
+    bool last_state; /*!< ultimo estado de la entrada*/
 };
 
 /* === Private function declarations =============================================================================== */
