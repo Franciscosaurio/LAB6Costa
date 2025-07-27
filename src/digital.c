@@ -76,9 +76,9 @@ digital_output_t digital_output_create(uint8_t port, uint8_t pin){
         self->pin=pin;
 
     }
-    return self;
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, false);
     Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, self->port, self->pin, true);
+    return self;
 }
 //implemento una funcion implementando malloc,si le devolvio algo entonces recien asigna el puerto y pin
 //que recibio a la estructura
@@ -88,15 +88,21 @@ digital_output_t digital_output_create(uint8_t port, uint8_t pin){
 //de las funciones vacias y veo que siga funcionando
 
 void digital_output_activate(digital_output_t self) {
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, true);
+    if(self != NULL){
+        Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, true);
+    }
+        //si self no es nulo, entonces activo el pin
+        //esto es para evitar que se intente acceder a un puntero nulo
+        //y evitar un segmentation fault
+    
 }
 
 void digital_output_deactivate(digital_output_t self) {
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, false);
+    if(self!=NULL){Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, false);}
 }
 
 void digital_output_toggle(digital_output_t self){
-    Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, self->port, self->pin);    
+    if(self!=NULL){Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, self->port, self->pin);}
 }
 
 digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted){
@@ -115,8 +121,14 @@ digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted){
 }
 
 bool digital_input_get_is_active(digital_input_t self) {
-    bool state = !Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, self->port, self->pin);
-    return self->inverted ? !state : state;
+    if (self != NULL) {
+        bool state = Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, self->port, self->pin);
+        if(self->inverted) {
+            state = !state;
+        }
+        return state;
+    }
+    return false; // si self es nulo, retorno false
 }
 
 digital_states_t digital_was_changed(digital_input_t self){

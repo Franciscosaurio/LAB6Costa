@@ -38,6 +38,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "bsp.h"
+#include "screen.h"
 /* === Macros definitions ====================================================================== */
 #define TICKS_PER_SECOND 5
 /* === Private data type declarations ========================================================== */
@@ -53,36 +54,37 @@
 /* === Private function implementation ========================================================= */
 
 /* === Public function implementation ========================================================= */
-
 int main(void) {
-    int divisor  = 0;
-    board_t board = board_create();
-    clock_t clock = clock_create(TICKS_PER_SECOND);
+    int divisor = 0;
 
-    // Inicializa la hora a 00:00:00
-    clock_time_t start_time = { .bcd = {0, 0, 0, 0, 0, 0} };
-    clock_set_time(clock, &start_time);  // Asegurate que esta función setea valid = true
+    // 1. Inicializar el board
+    board_t board = board_create();
+
+    // 2. Mostrar un número fijo de prueba (por ejemplo, 12:34)
+    uint8_t hora[4] = {4, 3, 2, 1};  // Representa "12:34"
+    screen_write_BCD(board->screen, hora, 4);
 
     while (true) {
+        // 3. Refrescar display cada vez que pasamos por el while
+        
+
         divisor++;
         if (divisor == 5) {
             divisor = 0;
-            clock_new_tick(clock);                      // Avanza 1 segundo
-            clock_display_time(clock, board->screen);   // Muestra en pantalla
+
+            // (opcional) cada X loops hacer parpadear por ejemplo los dos puntos
+            display_flash_digits(board->screen, 1, 2, 5);  // Parpadea los dígitos 1 y 2
         }
 
-        screen_refresh(board->screen);  // ¡Muy importante!
-
+        // 4. Delay "manual"
         for (int index = 0; index < 100; index++) {
             for (int delay = 0; delay < 25000; delay++) {
+                screen_refresh(board->screen);
                 __asm("NOP");
             }
         }
     }
 }
-
-
-
 /* === End of documentation ==================================================================== */
 
 /** @} End of module definition for doxygen */

@@ -27,8 +27,7 @@ SPDX-License-Identifier: MIT
 /* === Headers files inclusions ==================================================================================== */
 #include <stdint.h>
 #include <stdbool.h>
-#include "screen.h"
-#include "cia.h"
+#include "ciaa.h"
 /* === Header for C++ compatibility ================================================================================ */
 
 #ifdef __cplusplus

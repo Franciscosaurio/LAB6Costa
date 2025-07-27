@@ -33,7 +33,7 @@ extern "C" {
 #endif
 
 /* === Public macros definitions =================================================================================== */
-#include "cia.h"
+#include "ciaa.h"
 #include "screen.h"
 #include"digital.h"
 #include "clock.h"

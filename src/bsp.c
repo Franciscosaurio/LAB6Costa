@@ -27,10 +27,12 @@ SPDX-License-Identifier: MIT
 #include "chip.h"
 #include <stdlib.h>
 #include <string.h>
-#include "cia.h"
+#include "ciaa.h"
 #include "poncho.h"
 #include <stddef.h>
 #include "clock.h"
+#include "digital.h"
+#include "screen.h"
 
 /* === Macros definitions ========================================================================================== */
 
@@ -110,20 +112,27 @@ void segments_init(void){
 }
 
 void digits_turn_off(void) {
+    Chip_GPIO_ClearValue(LPC_GPIO_PORT, DIGITS_GPIO, DIGITS_MASK);
+    /*
     Chip_GPIO_ClearValue(LPC_GPIO_PORT, DIGIT_1_GPIO, DIGIT_1_BIT);
     Chip_GPIO_ClearValue(LPC_GPIO_PORT, SEGMENTS_GPIO, SEGMENTS_MASK);
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO,SEGMENT_P_BIT, false);
+    */
 }
 void segments_update(uint8_t value) {
+    Chip_GPIO_ClearValue(LPC_GPIO_PORT, SEGMENTS_GPIO, SEGMENTS_MASK);  // Limpia todos los segmentos
+    Chip_GPIO_SetValue(LPC_GPIO_PORT, SEGMENTS_GPIO, value & SEGMENTS_MASK);  // Enciende los necesarios
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, value & SEGMENT_P);  // Punto decimal
+/*
     //esta fucion actualiza los segmentos del display de la siguiente manera:
     // 1. Limpia los segmentos
     Chip_GPIO_SetValue(LPC_GPIO_PORT, SEGMENTS_GPIO, (value&SEGMENTS_MASK));
     // 2. Activa el punto decimal si es necesario
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, (value & SEGMENT_P));
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, (value & SEGMENT_P));*/
 }    
 
 void digit_turn_on(uint8_t digit) {
-    Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (1<<(3-digit))&DIGITS_MASK);
+    Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (1<<(digit)&DIGITS_MASK));
     // esta funcion setea el valor del gpio de los digitos
     // el 3-digit es para que el digito 1 sea el bit 0
 }

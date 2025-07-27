@@ -17,8 +17,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 SPDX-License-Identifier: MIT
 *********************************************************************************************************************/
 
-#ifndef CIA_H_
-#define CIA_H_
+#ifndef CIAA_H_
+#define CIAA_H_
 
 /** @file cia.h
  ** @brief Plantilla para la creación de archivos de de cabeceras en lenguaje C
@@ -105,4 +105,4 @@ extern "C" {
 }
 #endif
 
-#endif /* CIA_H_ */
+#endif /* CIAA_H_ */

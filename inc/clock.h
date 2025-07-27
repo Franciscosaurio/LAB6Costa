@@ -66,10 +66,10 @@ typedef struct clock_s *clock_t;
 clock_t clock_create(uint16_t ticks_per_second);
 
 /**
- * @brief 
+ * @brief función que obtiene el tiempo actual del reloj.
  * 
- * @param clock 
- * @param result 
+ * @param clock punter al reloj.
+ * @param result puntero al resultado donde se guardará el tiempo actual.
  * @return true 
  * @return false 
  */
@@ -78,7 +78,7 @@ bool clock_get_time(clock_t clock, clock_time_t *result);
 /**
  * @brief función que verifica si el tiempo del reloj es válido.
  * 
- * @param clock 
+ * @param clock punter al reloj.
  * @return true 
  * @return false 
  */
@@ -87,8 +87,8 @@ bool clock_time_is_valid(clock_t clock);
 /**
  * @brief función que ajusta el tiempo del reloj.
  * 
- * @param clock 
- * @param new_time 
+ * @param clock punter al reloj.
+ * @param new_time puntero al nuevo tiempo a establecer.
  * @return true 
  * @return false 
  */
@@ -97,15 +97,15 @@ bool clock_set_time(clock_t clock, const clock_time_t *new_time);
 /**
  * @brief función que simula el avance del reloj en segundos.
  * 
- * @param clock 
+ * @param clock punter al reloj.
  */
 void clock_new_tick(clock_t clock);
 
 /**
  * @brief función que establece la hora de la alarma.
  * 
- * @param clock 
- * @param alarm_time 
+ * @param clock punter al reloj.
+ * @param alarm_time punter a la hora de la alarma a establecer.
  * @return true 
  * @return false 
  */
