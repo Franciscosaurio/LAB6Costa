@@ -40,7 +40,7 @@
 #include "bsp.h"
 #include "screen.h"
 /* === Macros definitions ====================================================================== */
-#define TICKS_PER_SECOND 5
+#define TICKS_PER_SECOND 1
 /* === Private data type declarations ========================================================== */
 
 /* === Private variable declarations =========================================================== */
@@ -57,31 +57,38 @@
 int main(void) {
     int divisor = 0;
 
-    // 1. Inicializar el board
+    // Inicialización de la placa y obtención de los periféricos
     board_t board = board_create();
 
-    // 2. Mostrar un número fijo de prueba (por ejemplo, 12:34)
-    uint8_t hora[4] = {4, 3, 2, 1};  // Representa "12:34"
-    screen_write_BCD(board->screen, hora, 4);
-
+    // Crea el reloj con una estimación de 5 actualizaciones por segundo
+    clock_t reloj = clock_create(TICKS_PER_SECOND); 
+    
     while (true) {
-        // 3. Refrescar display cada vez que pasamos por el while
-        
-
         divisor++;
         if (divisor == 5) {
             divisor = 0;
-
-            // (opcional) cada X loops hacer parpadear por ejemplo los dos puntos
-            display_flash_digits(board->screen, 1, 2, 5);  // Parpadea los dígitos 1 y 2
+            // Obtener hora actual
+            clock_time_t tiempo={0};
+            
+            if(!clock_get_time(reloj, &tiempo)){
+            screen_write_BCD(board->screen, tiempo.bcd, 4);
+            // Encender punto entre horas y minutos (después del segundo dígito)
+            screen_add_point(board->screen, 2);
+            clock_set_time(reloj, &tiempo);
+            }else{
+                uint8_t hora[4]={tiempo.bcd[2], tiempo.bcd[3], tiempo.bcd[4], tiempo.bcd[5]};
+                screen_write_BCD(board->screen, hora, 4);
+            // Encender punto entre horas y minutos (después del segundo dígito)
+            screen_add_point(board->screen, 2);
+            }
+            clock_new_tick(reloj);
         }
-
-        // 4. Delay "manual"
+        // Delay y refresco del display
         for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
-                screen_refresh(board->screen);
+            for (int delay = 0; delay < 2500; delay++) {
                 __asm("NOP");
             }
+            screen_refresh(board->screen);
         }
     }
 }
