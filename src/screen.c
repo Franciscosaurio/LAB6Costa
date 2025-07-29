@@ -118,6 +118,7 @@ void screen_write_BCD(screen_t self, uint8_t value[], uint8_t size){
 }
 
 void screen_refresh(screen_t self){
+    // Esta funcion refresca el display es decir actualiza el digito actual
     uint8_t segments;
     self->driver->digits_turn_off();// Apaga los dígitos antes de actualizar
     self->current_digit = (self->current_digit + 1) % self->digits;
@@ -158,7 +159,7 @@ void display_flash_digits(screen_t self, uint8_t from, uint8_t to, uint16_t divi
         self->flashing_frequency = 2*divisor; // La frecuencia de parpadeo se establece como el doble del divisor
         self->flashing_count = 0;// Reinicia el contador de parpadeo
     }
-    
+    return;
 }
 void screen_add_point(screen_t screen, uint8_t digit){
     if (digit < screen->digits) {

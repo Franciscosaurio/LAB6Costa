@@ -71,14 +71,14 @@ digital_output_t digital_output_create(uint8_t gpio, uint8_t bit);
 //las otras 3 van a la funcion main en la parte del while
 
 /**
- * @brief 
+ * @brief Funcion para activar una salida digital
  * 
  * @param self 
  */
 void digital_output_activate(digital_output_t self);
 
 /**
- * @brief 
+ * @brief Funcion para desactivar una salida digital 
  * 
  * @param self 
  */
@@ -86,7 +86,7 @@ void digital_output_activate(digital_output_t self);
 void digital_output_deactivate(digital_output_t self);
 
 /**
- * @brief 
+ * @brief Funcion para alternar el estado de una salida digital 
  * 
  * @param self 
  */
@@ -94,18 +94,18 @@ void digital_output_deactivate(digital_output_t self);
 void digital_output_toggle(digital_output_t self);
 
 /**
- * @brief 
+ * @brief Funcion para crear una entrada digital 
  * 
- * @param gpio 
- * @param bit 
- * @param inverted 
+ * @param gpio este es el puerto donde esta conectado el pin
+ * @param bit este es el pin que se quiere configurar como entrada
+ * @param inverted este es un booleano que indica si la entrada esta invertida o no
  * @return digital_input_t 
  */
 
 digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted);
 
 /**
- * @brief 
+ * @brief Funcion para leer el estado de una entrada digital 
  * 
  * @param input 
  * @return true 
@@ -116,7 +116,7 @@ digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted);
 bool digital_input_get_is_active(digital_input_t input);
 
 /**
- * @brief 
+ * @brief Funcion para saber si una entrada digital cambio de estado 
  * 
  * @param input 
  * @return true 
@@ -136,7 +136,7 @@ bool digital_was_activated(digital_input_t input);
 bool digital_was_deactivated(digital_input_t input);
 
 /**
- * @brief 
+ * @brief Funcion para saber si una entrada digital cambio de estado
  * 
  * @param input 
  * @return digital_states_t 

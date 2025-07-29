@@ -74,10 +74,9 @@ digital_output_t digital_output_create(uint8_t port, uint8_t pin){
     if (self != NULL){
         self->port = port;
         self->pin=pin;
-
+        Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, false);
+        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, self->port, self->pin, true);
     }
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->port, self->pin, false);
-    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, self->port, self->pin, true);
     return self;
 }
 //implemento una funcion implementando malloc,si le devolvio algo entonces recien asigna el puerto y pin
@@ -112,7 +111,7 @@ digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted){
         self->pin = bit;
         self->inverted = inverted;
         //inicializamos la variable
-        self->last_state=false;// digital_input_get_is_active(self); <- ¿cuando usar?// consultar
+        self->last_state= digital_input_get_is_active(self);
         
         Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, gpio, bit, false);        
 
@@ -121,6 +120,8 @@ digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted){
 }
 
 bool digital_input_get_is_active(digital_input_t self) {
+    // Esta funcion lee el estado del pin y devuelve true si esta activo
+    // o false si esta inactivo.
     if (self != NULL) {
         bool state = Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, self->port, self->pin);
         if(self->inverted) {
@@ -132,6 +133,10 @@ bool digital_input_get_is_active(digital_input_t self) {
 }
 
 digital_states_t digital_was_changed(digital_input_t self){
+    // Esta funcion devuelve el estado de la entrada digital
+    // DIGITAL_INPUT_WAS_ACTIVATED si la entrada fue activada
+    // DIGITAL_INPUT_WAS_DEACTIVATE si la entrada fue desactivada
+    // DIGITAL_INPUT_NO_CHANGE si no hubo cambio en el estado de la entrada
     digital_states_t result = DIGITAL_INPUT_NO_CHANGE;
      
     //debo leer el estado actual
@@ -149,10 +154,16 @@ digital_states_t digital_was_changed(digital_input_t self){
 }
 
 bool digital_was_activated(digital_input_t self) {
+    // Esta funcion devuelve true si la entrada fue activada
+    // y false si no fue activada
+    // o si no hubo cambio en el estado de la entrada
     return (digital_was_changed(self) == DIGITAL_INPUT_WAS_ACTIVATED);
 }
 
 bool digital_was_deactivated(digital_input_t self) {
+    // Esta funcion devuelve true si la entrada fue desactivada
+    // y false si no fue desactivada
+    // o si no hubo cambio en el estado de la entrada
     return (digital_was_changed(self) == DIGITAL_INPUT_WAS_DEACTIVATE);
 }
 

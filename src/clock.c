@@ -67,6 +67,8 @@ bool clock_time_is_valid(clock_t clock) {
     return clock->valid;
 }
 bool clock_get_time(clock_t self, clock_time_t *result) {
+    // esta funcion obtiene el tiempo actual del reloj
+    // y lo almacena en result
     if (!self || !result) return false;
     memcpy(result, &self->current_time, sizeof(clock_time_t));
     return self->valid;
