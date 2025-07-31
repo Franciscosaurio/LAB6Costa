@@ -17,15 +17,19 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 SPDX-License-Identifier: MIT
 *********************************************************************************************************************/
 
-#ifndef BSP_H_
-#define BSP_H_
+#ifndef EVENTS_H_
+#define EVENTS_H_
 
-/** @file bsp.h
- ** @brief configuraciones para soporte de placa de hardware
+/** @file plantilla.h
+ ** @brief Plantilla para la creación de archivos de de cabeceras en lenguaje C
  **/
 
 /* === Headers files inclusions ==================================================================================== */
-
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include "clock.h"
 /* === Header for C++ compatibility ================================================================================ */
 
 #ifdef __cplusplus
@@ -33,31 +37,66 @@ extern "C" {
 #endif
 
 /* === Public macros definitions =================================================================================== */
-#include "ciaa.h"
-#include "screen.h"
-#include"digital.h"
-#include "clock.h"
-/* === Public data type declarations =============================================================================== */
 
-typedef struct board_s{
-    digital_output_t buzzer;
-    digital_input_t set_time;
-    digital_input_t set_alarm;
-    digital_input_t decrement;
-    digital_input_t increment;
-    digital_input_t accept;
-    digital_input_t cancel;
-    screen_t screen;
-}const * const board_t;
+typedef enum {
+    MODO_INVALIDO,
+    MODO_NORMAL,
+    MODO_SET_HORA,
+    MODO_SET_MINUTO,
+    MODO_SET_ALARMA_HORA,
+    MODO_SET_ALARMA_MINUTO,
+} modo_t;
+
+struct key_s {
+    bool normal;
+    bool long_press;
+    bool press;
+    uint8_t contador;
+    uint8_t inactivo;
+};
+typedef struct key_s * key_t;
+
+/* === Public data type declarations =============================================================================== */
 
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
-board_t board_create(void);
+/**
+ * @brief 
+ * 
+ * @return key_t 
+ */
+key_t key_create(void);
+/**
+ * @brief 
+ * 
+ * @return modo_t 
+ */
+modo_t modo_create(void);
+/**
+ * @brief función que incrementa el tiempo en formato BCD.
+ * 
+ * @param time la hora de reloj a incrementar.
+ * @param modo la estructura que contiene el modo actual del reloj.
+ */
+void time_increments(clock_time_t *time, modo_t modo);
+
+void time_decrement(clock_time_t *time, modo_t modo);
+
+/**
+ * @brief Set the time object
+ * 
+ * @param tecla 
+ * @param modo 
+ * @param key 
+ * @param reloj 
+ * @param time 
+ */
+void set_time(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time);
 /* === End of conditional blocks =================================================================================== */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* BSP_H_ */
+#endif /* EVENTS_H_ */

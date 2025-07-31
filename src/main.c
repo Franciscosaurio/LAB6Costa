@@ -38,7 +38,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "bsp.h"
+#include "clock.h"
 #include "screen.h"
+#include "poncho.h"
+#include "events.h"
 /* === Macros definitions ====================================================================== */
 #define TICKS_PER_SECOND 5
 /* === Private data type declarations ========================================================== */
@@ -55,131 +58,118 @@
 
 /* === Public function implementation ========================================================= */
 
-/*int main(void) {
-
-    int divisor = 0;
-
-    // Inicialización de la placa y obtención de los periféricos
-    board_t board = board_create();
-
-    // Crea el reloj con una estimación de 5 actualizaciones por segundo
-    clock_t reloj = clock_create(TICKS_PER_SECOND); 
-   digital_input_t F1 = digital_input_create(5,12,false);
-   
-   digital_input_t F2 = digital_input_create(5,13,false);
-   //digital_input_t F3 = digital_input_create(5,14,false);
-   //digital_input_t F4 = digital_input_create(5,15,false);
-   //digital_input_t CANCEL = digital_input_create(5,8,false);
-   //digital_input_t ACCEPT = digital_input_create(5,9,false);
-   
-   bool parpadeo, F1C=true;
-   bool en_ajuste=false;
-   //bool chochox=false;
-   uint8_t control;
-    while (true) {
-        divisor++;
-        if (divisor == 5) {
-            divisor = 0;
-            // Obtener hora actual
-            clock_time_t tiempo={0};// Inicializar la estructura de tiempo
-            
-            uint8_t hora[4]={tiempo.bcd[2],  tiempo.bcd[3], tiempo.bcd[4],tiempo.bcd[5]};
-            //parpadeo de la hora y los puntos             
-            if(!clock_time_is_valid(reloj)) {
-                //implemento parpadeo de la hora
-                if(parpadeo){
-                    screen_write_BCD(board->screen, hora, 4);
-                    // Encender punto entre horas y minutos (después del segundo dígito)
-                    screen_add_point(board->screen, 2);
-                    parpadeo=false;
-                }else{
-                    parpadeo=true;
-                }
-    
-            if((F1C)){
-                control=0;
-                F1C=true;
-                clock_set_time(reloj, &tiempo);
-
-            }
-            control++;
-            }else{
-                screen_write_BCD(board->screen, hora, 4);
-                // Encender punto entre horas y minutos (después del segundo dígito)
-                screen_add_point(board->screen, 2);
-            }
-            clock_new_tick(reloj);
-        }
-        // Delay y refresco del display
-        if(digital_input_get_is_active(F1)){
-                control++;
-                if(control>2 && F1C){
-                    //si se presiona F1 mas de 2 segundos se activa el modo de ajuste
-                    
-                    F1C=false;
-                    control=0;
+                
+                /*
+                if(digital_input_get_is_active(board->increment)){ }
+                y con F3 se disminuye el valor
+                if(digital_input_get_is_active(board->decrement)){
+                    if (time.bcd[5] > 0) {
+                        time.bcd[5]--;
+                    } else {
+                        time.bcd[5] = 9;
+                        if (time.bcd[4] > 0) {
+                            time.bcd[4]--;
+                        } else {
+                            time.bcd[4] = 5;
+                            if (time.bcd[3] > 0) {
+                                time.bcd[3]--;
+                            } else {
+                                time.bcd[3] = 9;
+                                if (time.bcd[2] > 0 || (time.bcd[3] == 2 && time.bcd[2] > 3)) {
+                                    time.bcd[2]--;
+                                }
+                            }
+                        }
                     }
-
-                }  
-        
-        for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
-                //le quite un 0 a delay para que vaya mas rapido(agregar al presentar)
-                __asm("NOP");
-            }
-            screen_refresh(board->screen);
-        }
-    }
-}
-*/
-int main(void) {
-    int divisor=0,control_F1 = 0;
-    bool ajustar_hora=false,hora_valida = false;
-    // Inicialización de la placa y obtención de los periféricos
-    board_t board = board_create();
-    digital_input_t F1 = digital_input_create(5,12,false);
-    // Crea el reloj con una estimación de 5 actualizaciones por segundo
-    clock_t reloj = clock_create(TICKS_PER_SECOND); 
-    
-    while (true) {
-        divisor++;
-        if (divisor == 5) {
-            divisor = 0;
-            // Obtener hora actual
-            clock_time_t tiempo={0};
-            uint8_t hora[4]={tiempo.bcd[2], tiempo.bcd[3], tiempo.bcd[4], tiempo.bcd[5]};
-            uint8_t hora_crota[4]={1,2,3,4};
-            //ajusto la hora
-
-            if(digital_was_activated(F1)||hora_valida){
-                if(digital_input_get_is_active(F1)){
-                    // Si se presiona el botón de ajuste de hora, se activa el modo de ajuste
-                    screen_write_BCD(board->screen, hora_crota, 4);
-                    // Encender punto entre horas y minutos (después del segundo dígito)
-                    screen_add_point(board->screen, 2);
-                    control_F1 = 0;
-                    //ajustar_hora=(board->set_time);
-                    hora_valida=true;
                 }
-                
-                
-            } 
-            control_F1++;
-            if(!hora_valida) {
-                //como la hora no es valida, se muestra 00.00
+                //si se presiona aceptar se setea la hora
+                if(digital_input_get_is_active(board->accept)&&inactivo<30){
+                    // Setea la hora actual del reloj
+                    //como ya acepte la hora, valido el tiempo en el que quedó para que luego se setee el reloj
+                    clock_set_time(reloj, &time);
+                    set_time = false; // Sale del modo de ajuste de hora
+                    inactivo=0; // Reinicia el contador de inactividad
+                }*/
+
+int main(void) {
+    // Inicialización de hardware
+    modo_t modo=modo_create();
+    key_t key=key_create();
+    board_t board = board_create();
+    clock_t reloj = clock_create(TICKS_PER_SECOND); // Crea el reloj con una estimación de 5 actualizaciones por segundo
+    clock_time_t time={0}; // Inicializa la estructura de tiempo
+    // Valores a mostrar
+    
+    int divisor = 0;
+    while (true) {
+        // Actualizar estado de teclas
+        divisor++;
+        uint8_t hora[4] = {time.bcd[5], time.bcd[4], time.bcd[3], time.bcd[2]};
+        if(divisor==5){
+            divisor=0;
+            
+            //si la hora no es valida muestor 00.00 y parpadean todos los digitos
+
+            //si se presiona la tecla F1 se activa el modo de ajuste de hora
+            set_time(digital_input_get_is_active(board->set_time),&modo,key,reloj, &time);//cambiar a set_states
+            //entro al seteo de tiempo y si está inactivo por mas de 30 segundos se sale
+            
+            if(modo==MODO_NORMAL){
                 screen_write_BCD(board->screen, hora, 4);
-                // Encender punto entre horas y minutos (después del segundo dígito)
-                screen_add_point(board->screen, 2);
-                //ahora tiene que parpadear, uso la funcion definida en screen.c
-                display_flash_digits(board->screen, 0, 3, 50);
-            }else{
-                screen_write_BCD(board->screen, hora_crota, 4);
-                // Encender punto entre horas y minutos (después del segundo dígito
-                screen_add_point(board->screen, 2);
+                screen_add_point(board->screen, 2); // Punto entre horas y minutos
+                
             }
-            clock_new_tick(reloj);
+            if(modo==MODO_INVALIDO){
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2); // Punto entre horas y minutos
+                display_flash_digits(board->screen, 0, 3, 50); // Parpadean todos los dígitos
+            }
+            if(modo==MODO_SET_MINUTO){
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2); // Punto entre horas y minutos
+                display_flash_digits(board->screen, 0, 1, 50);
+                if(digital_input_get_is_active(board->increment)){
+                    key->inactivo = 0; // Reinicia el contador de inactividad
+                    time_increments(&time, modo);
+                }
+                if(digital_input_get_is_active(board->decrement)){
+                        key->inactivo = 0; // Reinicia el contador de inactividad
+                        time_decrement(&time, modo);
+                        
+                    }
+                    if(digital_input_get_is_active(board->accept)){
+                        modo=MODO_SET_HORA; // Cambia al modo de ajuste de hora
+                        key->inactivo = 0; // Reinicia el contador de inactividad
+                    }
+                    if(digital_input_get_is_active(board->cancel)){
+                        if(!clock_time_is_valid(reloj)){
+                            modo=MODO_INVALIDO;
+                        }else{
+                            modo=MODO_NORMAL; // Sale del modo de ajuste de hora
+                        }
+                    }
+            }
+            if(modo==MODO_SET_HORA){
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2); // Punto entre horas y minutos
+                display_flash_digits(board->screen, 2, 3, 50); // Parpadean las horas
+                if(digital_input_get_is_active(board->increment)){
+                    key->inactivo = 0; // Reinicia el contador de inactividad
+                    time_increments(&time, modo);
+                }
+                if(digital_input_get_is_active(board->decrement)){
+                    key->inactivo = 0; // Reinicia el contador de inactividad
+                    time_decrement(&time, modo);                
+                }
+                if(digital_input_get_is_active(board->accept)){
+                    clock_set_time(reloj, &time);
+                    modo = MODO_NORMAL; // Sale del modo de ajuste de hora
+                    key->inactivo = 0; // Reinicia el contador de inactividad
+
+                }
+            }             
+        
         }
-        // Delay y refresco del display
         for (int index = 0; index < 100; index++) {
             for (int delay = 0; delay < 25000; delay++) {
                 __asm("NOP");
@@ -188,6 +178,7 @@ int main(void) {
         }
     }
 }
+
 /* === End of documentation ==================================================================== */
 
 /** @} End of module definition for doxygen */

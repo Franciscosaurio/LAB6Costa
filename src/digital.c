@@ -111,9 +111,7 @@ digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted){
         self->pin = bit;
         self->inverted = inverted;
         //inicializamos la variable
-        self->last_state= digital_input_get_is_active(self);
-        
-        Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, gpio, bit, false);        
+        self->last_state= digital_input_get_is_active(self);       
 
     }
     return self;
@@ -122,6 +120,7 @@ digital_input_t digital_input_create(uint8_t gpio, uint8_t bit, bool inverted){
 bool digital_input_get_is_active(digital_input_t self) {
     // Esta funcion lee el estado del pin y devuelve true si esta activo
     // o false si esta inactivo.
+    
     if (self != NULL) {
         bool state = Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, self->port, self->pin);
         if(self->inverted) {

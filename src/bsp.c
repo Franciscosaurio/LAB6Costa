@@ -33,6 +33,7 @@ SPDX-License-Identifier: MIT
 #include "clock.h"
 #include "digital.h"
 #include "screen.h"
+#include "events.h"
 
 /* === Macros definitions ========================================================================================== */
 
@@ -51,6 +52,7 @@ static const struct screen_driver_s screen_driver = {
     .digit_turn_on = digit_turn_on,
 };
 /* === Public variable definitions ================================================================================= */
+
 
 /* === Private function definitions ================================================================================ */
 // inicializa los 4 digitos del display
@@ -110,7 +112,31 @@ void segments_init(void){
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, false);
     Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, true);
 }
+void key_init(void){
+    Chip_SCU_PinMuxSet(KEY_F1_PORT, KEY_F1_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F1_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, KEY_F1_GPIO, KEY_F1_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, KEY_F1_GPIO, KEY_F1_BIT, false);
 
+    Chip_SCU_PinMuxSet(KEY_F2_PORT, KEY_F2_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F2_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, KEY_F2_GPIO, KEY_F2_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, KEY_F2_GPIO, KEY_F2_BIT, false);
+
+    Chip_SCU_PinMuxSet(KEY_F3_PORT, KEY_F3_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F3_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, KEY_F3_GPIO, KEY_F3_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, KEY_F3_GPIO, KEY_F3_BIT, false); 
+
+    Chip_SCU_PinMuxSet(KEY_F4_PORT, KEY_F4_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F4_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, KEY_F4_GPIO, KEY_F4_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, KEY_F4_GPIO, KEY_F4_BIT, false);
+
+    Chip_SCU_PinMuxSet(KEY_CANCEL_PORT, KEY_CANCEL_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_CANCEL_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, KEY_CANCEL_GPIO, KEY_CANCEL_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, KEY_CANCEL_GPIO, KEY_CANCEL_BIT, false);
+
+    Chip_SCU_PinMuxSet(KEY_ACCEPT_PORT, KEY_ACCEPT_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_ACCEPT_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, KEY_ACCEPT_GPIO, KEY_ACCEPT_BIT,false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, KEY_ACCEPT_GPIO, KEY_ACCEPT_BIT, false);
+}
 void digits_turn_off(void) {
     Chip_GPIO_ClearValue(LPC_GPIO_PORT, DIGITS_GPIO, DIGITS_MASK);
     /*
@@ -130,19 +156,18 @@ void segments_update(uint8_t value) {
     // 2. Activa el punto decimal si es necesario
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, (value & SEGMENT_P));*/
 }    
-
 void digit_turn_on(uint8_t digit) {
     Chip_GPIO_SetValue(LPC_GPIO_PORT, DIGITS_GPIO, (1<<(digit)&DIGITS_MASK));
     // esta funcion setea el valor del gpio de los digitos
     // el 3-digit es para que el digito 1 sea el bit 0
 }
-
 void buzz_turn_on(void) {
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, BUZZER_GPIO, BUZZER_BIT, true);
 }
 void buzz_turn_off(void) {
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, BUZZER_GPIO, BUZZER_BIT, false);
 }
+
 //********************* */
 /* === Public function implementation ============================================================================== */
 board_t board_create(void) {
@@ -153,6 +178,15 @@ board_t board_create(void) {
         digits_init();
         segments_init();
         board->screen = screen_create(4, &screen_driver);// a board
+        key_init();
+        board->set_time = digital_input_create(KEY_F1_GPIO, KEY_F1_BIT, false);
+        board->set_alarm = digital_input_create(KEY_F2_GPIO, KEY_F2_BIT, false);
+        board->decrement = digital_input_create(KEY_F3_GPIO, KEY_F3_BIT, false);
+        board->increment = digital_input_create(KEY_F4_GPIO, KEY_F4_BIT, false);
+        board->accept = digital_input_create(KEY_ACCEPT_GPIO, KEY_ACCEPT_BIT, false);
+        board->cancel = digital_input_create(KEY_CANCEL_GPIO, KEY_CANCEL_BIT, false);
+        
+        // inicializo el buzzer
     }
     return board;
 }

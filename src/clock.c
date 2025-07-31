@@ -58,6 +58,7 @@ clock_t clock_create(uint16_t ticks_per_second) {
     self->ticks_per_second = ticks_per_second;// establece los ticks por segundo
     return self;
 }
+
 bool clock_time_is_valid(clock_t clock) {
     // Implementación de la verificación de la validez del tiempo del reloj
     // Aquí se puede verificar si el reloj tiene un tiempo válido
@@ -66,6 +67,7 @@ bool clock_time_is_valid(clock_t clock) {
     if(!clock) return false;
     return clock->valid;
 }
+
 bool clock_get_time(clock_t self, clock_time_t *result) {
     // esta funcion obtiene el tiempo actual del reloj
     // y lo almacena en result
@@ -74,13 +76,14 @@ bool clock_get_time(clock_t self, clock_time_t *result) {
     return self->valid;
 }
 
-
 bool clock_set_time(clock_t self, const clock_time_t *new_time){
+    //esta funcion establece el tiempo actual del reloj
     if (!self || !new_time) return false;
     self->valid = true;
     memcpy(&self->current_time, new_time, sizeof(clock_time_t));
     return self->valid;
 }
+
 
 
 static void bcd_increment(clock_time_t *time) {
@@ -125,7 +128,6 @@ static void bcd_increment(clock_time_t *time) {
     }
 }
 
-
 void clock_new_tick(clock_t clock) {
     if (!clock->valid) return;
     clock->tick_count++;
@@ -140,21 +142,17 @@ void clock_new_tick(clock_t clock) {
     }
 }
 
-
-
 bool clock_set_alarm_time(clock_t clock, const clock_time_t *alarm_time) {
     if (!clock || !alarm_time) return false;
     memcpy(&clock->alarm_time, alarm_time, sizeof(clock_time_t));
     return true;
 }
 
-
 bool clock_get_alarm_time(clock_t clock, clock_time_t *alarm_time) {
     if (!clock || !alarm_time) return false;
     memcpy(alarm_time, &clock->alarm_time, sizeof(clock_time_t));
     return true;
 }
-
 
 void clock_enable_alarm(clock_t clock) {
     clock->alarm_enabled = true;// habilita la alarma
