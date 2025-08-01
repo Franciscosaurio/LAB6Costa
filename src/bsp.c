@@ -186,6 +186,7 @@ board_t board_create(void) {
         board->accept = digital_input_create(KEY_ACCEPT_GPIO, KEY_ACCEPT_BIT, false);
         board->cancel = digital_input_create(KEY_CANCEL_GPIO, KEY_CANCEL_BIT, false);
         
+        board->buzzer=digital_output_create(BUZZER_GPIO, BUZZER_BIT);
         // inicializo el buzzer
     }
     return board;

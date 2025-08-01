@@ -47,6 +47,12 @@ typedef enum {
     MODO_SET_ALARMA_MINUTO,
 } modo_t;
 
+typedef enum{
+    ALARMA_ACTIVA,
+    ALARMA_POSPUESTA,
+    ALARMA_INACTIVA,
+} alarma_t;
+
 struct key_s {
     bool normal;
     bool long_press;
@@ -61,6 +67,9 @@ typedef struct key_s * key_t;
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
+
+void tecla_gesto(key_t key, bool tecla);
+
 /**
  * @brief 
  * 
@@ -79,9 +88,9 @@ modo_t modo_create(void);
  * @param time la hora de reloj a incrementar.
  * @param modo la estructura que contiene el modo actual del reloj.
  */
-void time_increments(clock_time_t *time, modo_t modo);
+void time_increments(clock_time_t *time, modo_t modo,key_t key);
 
-void time_decrement(clock_time_t *time, modo_t modo);
+void time_decrement(clock_time_t *time, modo_t modo,key_t key);
 
 /**
  * @brief Set the time object
@@ -92,7 +101,7 @@ void time_decrement(clock_time_t *time, modo_t modo);
  * @param reloj 
  * @param time 
  */
-void set_time(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time);
+void get_modo(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time);
 /* === End of conditional blocks =================================================================================== */
 
 #ifdef __cplusplus
