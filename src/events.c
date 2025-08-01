@@ -44,10 +44,13 @@ modo_t modo_create(void) {
 
 void time_increments(clock_time_t *time, modo_t modo) {
     if(modo==MODO_SET_MINUTO){
-        if (++time->bcd[2] > 9) {
-            time->bcd[2] = 0;
-            if (++time->bcd[3] > 5) {
-                time->bcd[3] = 0;
+        time->bcd[5]++;
+        if(time->bcd[5]>9){
+            time->bcd[5]=0;
+            time->bcd[4]++;
+            //reseteo cuando la unidad de minutos se vuelve 9 y ademas le sumo un digito a la decena de minutos
+            if(time->bcd[4]>5){
+                time->bcd[4]=0;
             }
         }
     }else{
@@ -63,12 +66,14 @@ void time_increments(clock_time_t *time, modo_t modo) {
 }
 void time_decrement(clock_time_t *time, modo_t modo){
     if(modo==MODO_SET_MINUTO){
-        if (--time->bcd[2] < 0) {
-                time->bcd[2] = 9;
-                if (--time->bcd[3] < 0) {
-                    time->bcd[3] = 5;
-                }
+        time->bcd[3]--;
+        if(time->bcd[3]<0){
+            time->bcd[3]=9;
+            time->bcd[2]--;
+            if(time->bcd[2]<0){
+                time->bcd[2]=5;
             }
+        }
     }
     else{
         if(modo==MODO_SET_HORA){

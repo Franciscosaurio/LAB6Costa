@@ -113,8 +113,8 @@ int main(void) {
             //si se presiona la tecla F1 se activa el modo de ajuste de hora
             set_time(digital_input_get_is_active(board->set_time),&modo,key,reloj, &time);//cambiar a set_states
             //entro al seteo de tiempo y si está inactivo por mas de 30 segundos se sale
-            
-            if(modo==MODO_NORMAL){
+        }
+        if(modo==MODO_NORMAL){
                 screen_write_BCD(board->screen, hora, 4);
                 screen_add_point(board->screen, 2); // Punto entre horas y minutos
                 
@@ -122,12 +122,12 @@ int main(void) {
             if(modo==MODO_INVALIDO){
                 screen_write_BCD(board->screen, hora, 4);
                 screen_add_point(board->screen, 2); // Punto entre horas y minutos
-                display_flash_digits(board->screen, 0, 3, 50); // Parpadean todos los dígitos
+                display_flash_digits(board->screen, 0, 3, 10); // Parpadean todos los dígitos
             }
             if(modo==MODO_SET_MINUTO){
                 screen_write_BCD(board->screen, hora, 4);
                 screen_add_point(board->screen, 2); // Punto entre horas y minutos
-                display_flash_digits(board->screen, 0, 1, 50);
+                display_flash_digits(board->screen, 0, 1, 10);
                 if(digital_input_get_is_active(board->increment)){
                     key->inactivo = 0; // Reinicia el contador de inactividad
                     time_increments(&time, modo);
@@ -167,9 +167,7 @@ int main(void) {
                     key->inactivo = 0; // Reinicia el contador de inactividad
 
                 }
-            }             
-        
-        }
+            } 
         for (int index = 0; index < 100; index++) {
             for (int delay = 0; delay < 25000; delay++) {
                 __asm("NOP");
