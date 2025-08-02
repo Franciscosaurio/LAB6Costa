@@ -92,7 +92,7 @@ void time_decrement(clock_time_t *time, modo_t modo);
  * @param reloj 
  * @param time 
  */
-void set_time(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time);
+void get_mode(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time);
 /* === End of conditional blocks =================================================================================== */
 
 #ifdef __cplusplus

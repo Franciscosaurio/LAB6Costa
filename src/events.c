@@ -43,52 +43,54 @@ modo_t modo_create(void) {
 }
 
 void time_increments(clock_time_t *time, modo_t modo) {
-    if(modo==MODO_SET_MINUTO){
-        time->bcd[5]++;
-        if(time->bcd[5]>9){
-            time->bcd[5]=0;
-            time->bcd[4]++;
-            //reseteo cuando la unidad de minutos se vuelve 9 y ademas le sumo un digito a la decena de minutos
-            if(time->bcd[4]>5){
-                time->bcd[4]=0;
+    if (modo == MODO_SET_MINUTO) {
+        if (++time->bcd[2] > 9) {  // Mu (hora[0])
+            time->bcd[2] = 0;
+            if (++time->bcd[3] > 5) {  // Md (hora[1])
+                time->bcd[3] = 0;
             }
         }
-    }else{
-        if(modo==MODO_SET_HORA){
-            if (++time->bcd[4] > 3) {
+    } else if (modo == MODO_SET_HORA) {
+        if (++time->bcd[4] > 9) {  // Hu (hora[2])
+            time->bcd[4] = 0;
+            if (++time->bcd[5] > 2 || (time->bcd[5] == 2 && time->bcd[4] > 3)) {
+                time->bcd[5] = 0;
                 time->bcd[4] = 0;
-                if (++time->bcd[5] >=2) {
-                    time->bcd[5] = 0;
-                }
             }
         }
     }
 }
-void time_decrement(clock_time_t *time, modo_t modo){
-    if(modo==MODO_SET_MINUTO){
-        time->bcd[3]--;
-        if(time->bcd[3]<0){
-            time->bcd[3]=9;
+
+void time_decrement(clock_time_t *time, modo_t modo) {
+    if (modo == MODO_SET_MINUTO) {
+        if (time->bcd[2] == 0) {  // Mu (hora[0])
+            time->bcd[2] = 9;
+            if (time->bcd[3] == 0) {  // Md (hora[1])
+                time->bcd[3] = 5;
+            } else {
+                time->bcd[3]--;
+            }
+        } else {
             time->bcd[2]--;
-            if(time->bcd[2]<0){
-                time->bcd[2]=5;
-            }
         }
-    }
-    else{
-        if(modo==MODO_SET_HORA){
-            if (--time->bcd[2] < 0) {
-                time->bcd[2] = 9;
-                if (--time->bcd[3] < 0) {
-                    time->bcd[3] = 5;
+    } else if (modo == MODO_SET_HORA) {
+        if (time->bcd[4] == 0) {  // Hu (hora[2])
+            time->bcd[4] = 9;
+            if (time->bcd[5] == 0) {
+                time->bcd[5] = 2;
+                time->bcd[4] = 3;
+            } else {
+                time->bcd[5]--;
+                if (time->bcd[5] == 2 && time->bcd[4] > 3) {
+                    time->bcd[4] = 3;
                 }
             }
+        } else {
+            time->bcd[4]--;
         }
     }
 }
-
-
-void set_time(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time) {
+void get_mode(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time) {
     if (tecla) {        
         key->contador++;
         key->normal = false;
