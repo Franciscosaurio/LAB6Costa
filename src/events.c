@@ -51,13 +51,11 @@ void time_increments(clock_time_t *time, modo_t modo) {
             }
         }
     } else if (modo == MODO_SET_HORA) {
-        if (++time->bcd[4] > 9) {  // Hu (hora[2])
-            time->bcd[4] = 0;
-            if (++time->bcd[5] > 2 || (time->bcd[5] == 2 && time->bcd[4] > 3)) {
-                time->bcd[5] = 0;
-                time->bcd[4] = 0;
-            }
-        }
+        // Convertir a valor entero para facilitar control de límite 23
+        uint8_t horas = time->bcd[5] * 10 + time->bcd[4];
+        horas = (horas + 1) % 24;
+        time->bcd[5] = horas / 10;
+        time->bcd[4] = horas % 10;
     }
 }
 
@@ -74,20 +72,14 @@ void time_decrement(clock_time_t *time, modo_t modo) {
             time->bcd[2]--;
         }
     } else if (modo == MODO_SET_HORA) {
-        if (time->bcd[4] == 0) {  // Hu (hora[2])
-            time->bcd[4] = 9;
-            if (time->bcd[5] == 0) {
-                time->bcd[5] = 2;
-                time->bcd[4] = 3;
-            } else {
-                time->bcd[5]--;
-                if (time->bcd[5] == 2 && time->bcd[4] > 3) {
-                    time->bcd[4] = 3;
-                }
-            }
+        uint8_t horas = time->bcd[5] * 10 + time->bcd[4];
+        if (horas == 0) {
+            horas = 23;
         } else {
-            time->bcd[4]--;
+            horas--;
         }
+        time->bcd[5] = horas / 10;
+        time->bcd[4] = horas % 10;
     }
 }
 void get_mode(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time) {

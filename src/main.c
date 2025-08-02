@@ -157,41 +157,72 @@ int main(void) {
 
     if (divisor == 5) {
         divisor = 0;
+        switch (modo)
+        {
+        case MODO_INVALIDO:
+            display_flash_digits(board->screen, 0, 3, 50);
+            break;
+        case MODO_SET_MINUTO:
+            display_flash_digits(board->screen, 0, 1, 50);
+        break;
+        case MODO_SET_HORA:
+            display_flash_digits(board->screen, 2, 3, 50);
+        break;
 
-        // Activar modo de ajuste solo si hubo flanco de activación
+        }
         get_mode(digital_was_activated(board->set_time), &modo, key, reloj, &time);
     }
-
-    if (modo == MODO_NORMAL) {
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);
-    }
-
     if (modo == MODO_INVALIDO) {
+            screen_write_BCD(board->screen, hora, 4);
+            screen_add_point(board->screen, 2);
+            
+        }
+        if (modo == MODO_NORMAL) {
+            screen_write_BCD(board->screen, hora, 4);
+            screen_add_point(board->screen, 2);
+        }
+    if(modo == MODO_SET_MINUTO){
         screen_write_BCD(board->screen, hora, 4);
         screen_add_point(board->screen, 2);
-        display_flash_digits(board->screen, 0, 3, 10);
-    }
-    if(modo==MODO_SET_MINUTO){
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);
-        display_flash_digits(board->screen, 0, 1, 10);
+        
+        if(digital_input_get_is_active(board->accept)){
+            key->inactivo=0;
+            modo=MODO_SET_HORA;
+        }
         if(digital_input_get_is_active(board->increment)){
+            key->inactivo=0;
             time_increments(&time,modo);
         }
         if(digital_input_get_is_active(board->decrement)){
+            key->inactivo=0;
             time_decrement(&time,modo);
         }
-        if(digital_input_get_is_active(board->accept)){
-            modo=MODO_SET_HORA;
+        
+    }
+    if(digital_input_get_is_active(board->cancel)){
+        if(clock_time_is_valid(reloj)){
+            modo=MODO_NORMAL;
+        }else{
+            modo=MODO_INVALIDO;
         }
     }
     if(modo==MODO_SET_HORA){
+        screen_write_BCD(board->screen, hora, 4);
+        screen_add_point(board->screen, 2);
         if(digital_input_get_is_active(board->increment)){
+            key->inactivo=0;
             time_increments(&time,modo);
         }
         if(digital_input_get_is_active(board->decrement)){
+            key->inactivo=0;
             time_decrement(&time,modo);
+        }
+        if(digital_input_get_is_active(board->accept)){
+            key->inactivo=0;
+            validate_time(reloj,&time);
+            if(clock_time_is_valid(reloj)){
+                modo=MODO_NORMAL;
+            }
         }
         
     }

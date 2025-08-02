@@ -127,7 +127,10 @@ static void bcd_increment(clock_time_t *time) {
         }
     }
 }
-
+void validate_time(clock_t reloj, clock_time_t *time){
+    reloj->current_time = *time;
+    reloj->valid=true;
+}
 void clock_new_tick(clock_t clock) {
     if (!clock->valid) return;
     clock->tick_count++;

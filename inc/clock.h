@@ -56,7 +56,13 @@ typedef struct clock_s *clock_t;
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
-
+/**
+ * @brief funcion que valida el tiempo que se setea del reloj 
+ * 
+ * @param reloj estructura de reloj
+ * @param time tiempo seteado del MODO_SET_HORA
+ */
+void validate_time(clock_t reloj, clock_time_t *time);
 
 /**
  * @brief funcion que crea el reloj.
