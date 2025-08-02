@@ -88,9 +88,9 @@ modo_t modo_create(void);
  * @param time la hora de reloj a incrementar.
  * @param modo la estructura que contiene el modo actual del reloj.
  */
-void time_increments(clock_time_t *time, modo_t modo,key_t key);
+void time_increments(clock_time_t *time, modo_t modo);
 
-void time_decrement(clock_time_t *time, modo_t modo,key_t key);
+void time_decrement(clock_time_t *time, modo_t modo);
 
 /**
  * @brief Set the time object
