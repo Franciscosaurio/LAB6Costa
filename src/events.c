@@ -42,73 +42,56 @@ modo_t modo_create(void) {
     return MODO_INVALIDO;  // Devuelve el estado inicial directamente
 }
 
-void time_increments(clock_time_t *time, modo_t modo,key_t key){
-    if(modo==MODO_SET_HORA&&key->press){
-        if (++time->bcd[3] > 3) {
-            time->bcd[3] = 0;
-            if (++time->bcd[2] >= 2) {
-                time->bcd[2] = 0;
+void time_increments(clock_time_t *time, modo_t modo) {
+    if (modo == MODO_SET_MINUTO) {
+        if (++time->bcd[2] > 9) {  // Mu (hora[0])
+            time->bcd[2] = 0;
+            if (++time->bcd[3] > 5) {  // Md (hora[1])
+                time->bcd[3] = 0;
             }
         }
-    }else{
-        if(modo==MODO_SET_MINUTO){
-            if (++time->bcd[5] > 9) {
+    } else if (modo == MODO_SET_HORA) {
+        if (++time->bcd[4] > 9) {  // Hu (hora[2])
+            time->bcd[4] = 0;
+            if (++time->bcd[5] > 2 || (time->bcd[5] == 2 && time->bcd[4] > 3)) {
                 time->bcd[5] = 0;
-                if (++time->bcd[4] > 5) {
-                    time->bcd[4] = 0;
+                time->bcd[4] = 0;
+            }
+        }
+    }
+}
+
+void time_decrement(clock_time_t *time, modo_t modo) {
+    if (modo == MODO_SET_MINUTO) {
+        if (time->bcd[2] == 0) {  // Mu (hora[0])
+            time->bcd[2] = 9;
+            if (time->bcd[3] == 0) {  // Md (hora[1])
+                time->bcd[3] = 5;
+            } else {
+                time->bcd[3]--;
+            }
+        } else {
+            time->bcd[2]--;
+        }
+    } else if (modo == MODO_SET_HORA) {
+        if (time->bcd[4] == 0) {  // Hu (hora[2])
+            time->bcd[4] = 9;
+            if (time->bcd[5] == 0) {
+                time->bcd[5] = 2;
+                time->bcd[4] = 3;
+            } else {
+                time->bcd[5]--;
+                if (time->bcd[5] == 2 && time->bcd[4] > 3) {
+                    time->bcd[4] = 3;
                 }
             }
+        } else {
+            time->bcd[4]--;
         }
     }
 }
-//solucionar el incremento constante con digital was activated
-void time_decrement(clock_time_t *time, modo_t modo,key_t key){
-    if(modo == MODO_SET_HORA){
-        if (--time->bcd[3] < 0) {
-            time->bcd[3] = 3;
-            if (--time->bcd[2] < 0) {
-                time->bcd[2] = 2;
-            }
-        }
-    } else if (modo == MODO_SET_MINUTO){
-        if (--time->bcd[5] < 0) {
-            time->bcd[5] = 9;
-            if (--time->bcd[4] < 0) {
-                time->bcd[4] = 5;
-            }
-        }
-    }
-}
-
-void tecla_gesto(key_t key, bool tecla){
-    if (tecla) {    
-        //si la tecla se presiona el contador aumenta y si aumenta a 3 se activa el modo de ajuste de minutos    
-        key->contador++;
-        key->normal = false;
-        key->press = true;
-        if (key->contador > 3) {
-            key->long_press = true;
-            
-        }
-    } else {
-        key->inactivo++;
-        key->long_press=false;
-        key->press = false;
-        key->normal = true;
-        if (key->inactivo > 10) {
-            key->inactivo = 0;
-            key->normal = true;
-            key->long_press = false;
-            key->press = false;
-            
-        }
-    }
-
-}
-
-void get_modo(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time) {
-    if (tecla) {    
-        //si la tecla se presiona el contador aumenta y si aumenta a 3 se activa el modo de ajuste de minutos    
+void get_mode(bool tecla, modo_t *modo, key_t key, clock_t reloj, clock_time_t *time) {
+    if (tecla) {        
         key->contador++;
         key->normal = false;
         if (key->contador > 3) {

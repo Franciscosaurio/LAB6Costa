@@ -104,13 +104,19 @@ void screen_write_BCD(screen_t self, uint8_t value[], uint8_t size){
     memset(self->value, 0, sizeof(self->value)); 
     // Limpio el buffer de valores
     // memset es una funcion  de la stdlib para inicializar arrays
+    
 
     if(size > self->digits){
         size = self->digits;
         //esta linea de codigo lo que hace es limitar el tamaño del array al numero de digitos
     }
     for(uint8_t i=0; i<size; i++){
-        self->value[i]=IMAGES[value[i]];
+        if(value[i]<11){
+            self->value[i]=IMAGES[value[i]];
+        }else{
+            self->value[i]=0;
+        }
+         
         //esta linea de codigo lo que hace es asignar el valor de la imagen al array de valores
         // value[i] es el valor que quiero mostrar en el digito i
         // cada valor de sd lo uso para entrar a la memoria de imagenes
@@ -147,11 +153,11 @@ void screen_refresh(screen_t self){
 }
 
 void display_flash_digits(screen_t self, uint8_t from, uint8_t to, uint16_t divisor) {
-    int result;
+    
     if (from > to || from >= SCREEN_MAX_DIGITS || to >= SCREEN_MAX_DIGITS) {
-        result=1; // Error: los indices estan fuera de rango
+        return; // Error: los indices estan fuera de rango
     }else if(!self){
-        result=-1; // Error: from es mayor que to
+        return; // Error: from es mayor que to
     } else{
         //lo que hace este else es asignar los valores de parpadeo a la estructura
         self->flashing_from = from;// Asigna el valor de inicio del parpadeo a la estructura
