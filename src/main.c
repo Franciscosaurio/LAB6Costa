@@ -71,7 +71,6 @@ int main(void) {
             .hours={0,0},//Hu,Hd
         }
     }; // Inicializa la estructura de tiempo
-    
     // Valores a mostrar
     
     int divisor = 0;
@@ -168,20 +167,29 @@ int main(void) {
         case MODO_SET_HORA:
             display_flash_digits(board->screen, 2, 3, 50);
         break;
-
+        case MODO_SET_ALARMA_HORA:
+        break;
+        case MODO_SET_ALARMA_MINUTO:
+        break;
+        case MODO_NORMAL:
+        break;
         }
         get_mode(digital_was_activated(board->set_time), &modo, key, reloj, &time);
     }
+    
     if (modo == MODO_INVALIDO) {
-            screen_write_BCD(board->screen, hora, 4);
-            screen_add_point(board->screen, 2);
-            
+        for(int i=0;i<3;i++){
+            hora[i]=0;
         }
-        if (modo == MODO_NORMAL) {
-            screen_write_BCD(board->screen, hora, 4);
-            screen_add_point(board->screen, 2);
-        }
+        screen_write_BCD(board->screen, hora, 4);
+        screen_add_point(board->screen, 2);      
+    }
+    if (modo == MODO_NORMAL) {
+        screen_write_BCD(board->screen, hora, 4);
+        screen_add_point(board->screen, 2);
+    }
     if(modo == MODO_SET_MINUTO){
+        
         screen_write_BCD(board->screen, hora, 4);
         screen_add_point(board->screen, 2);
         
@@ -199,7 +207,7 @@ int main(void) {
         }
         
     }
-    if(digital_input_get_is_active(board->cancel)){
+    if(digital_input_get_is_active(board->cancel)||key->inactivo>30){
         if(clock_time_is_valid(reloj)){
             modo=MODO_NORMAL;
         }else{
@@ -229,7 +237,7 @@ int main(void) {
     
     // Refresco de display respetando los 2 for
     for (int index = 0; index < 100; index++) {
-        for (int delay = 0; delay < 25000; delay++) {
+        for (int delay = 0; delay < 20000; delay++) {
             __asm("NOP");
         }
         screen_refresh(board->screen);

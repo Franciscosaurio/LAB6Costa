@@ -90,7 +90,14 @@ modo_t modo_create(void);
  */
 void time_increments(clock_time_t *time, modo_t modo);
 
+/**
+ * @brief funcion  que decrementa el tiempo en formato BCD.
+ * 
+ * @param time la hora de reloj a decrementar. 
+ * @param modo la estructura que contiene el modo actual del reloj.
+ */
 void time_decrement(clock_time_t *time, modo_t modo);
+
 
 /**
  * @brief Set the time object
