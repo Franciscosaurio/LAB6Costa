@@ -74,88 +74,16 @@ int main(void) {
     // Valores a mostrar
     
     int divisor = 0;
-  /*  while (true) {
-        // Actualizar estado de teclas
-        divisor++;
-        uint8_t time[4] = {time.bcd[5], time.bcd[4], time.bcd[3], time.bcd[2]};
-        uint8_t time_invalida[4] = {0};
-        if(divisor==5){
-            divisor=0;
-            
-            //si la time no es valida muestor 00.00 y parpadean todos los digitos
-
-            //si se presiona la tecla F1 se activa el modo de ajuste de time
-            set_time(digital_input_get_is_active(board->set_time),&modo,key,reloj, &time);//cambiar a set_states
-            //entro al seteo de tiempo y si está inactivo por mas de 30 segundos se sale
-        }
-        if(modo==MODO_NORMAL){
-                screen_write_BCD(board->screen, time, 4);
-                screen_add_point(board->screen, 2); // Punto entre times y minutos                
-            }
-            if(modo==MODO_INVALIDO){
-                screen_write_BCD(board->screen, time_invalida, 4);
-                screen_add_point(board->screen, 2); // Punto entre times y minutos
-                display_flash_digits(board->screen, 0, 3, 10); // Parpadean todos los dígitos
-            }
-            if(modo==MODO_SET_MINUTO){
-                if(digital_input_get_is_active(board->set_time)){
-                    screen_write_BCD(board->screen, time, 4);
-                    screen_add_point(board->screen, 2); // Punto entre times y minutos
-                    display_flash_digits(board->screen, 0, 1, 10);
-                }
-                
-                if(digital_input_get_is_active(board->increment)){
-                    key->inactivo = 0; // Reinicia el contador de inactividad
-                    time_increments(&time, modo);
-                }
-                key->inactivo = 0; // Reinicia el contador de inactividad
-                time_decrement(&time, modo);
-                    if(digital_input_get_is_active(board->accept)){
-                        modo=MODO_SET_time; // Cambia al modo de ajuste de time
-                        key->inactivo = 0; // Reinicia el contador de inactividad
-                    }
-                    if(digital_input_get_is_active(board->cancel)){
-                        if(!clock_time_is_valid(reloj)){
-                            modo=MODO_INVALIDO;
-                        }else{
-                            modo=MODO_NORMAL; // Sale del modo de ajuste de time
-                        }
-                    }
-            }
-            if(modo==MODO_SET_time){
-                screen_write_BCD(board->screen, time, 4);
-                screen_add_point(board->screen, 2); // Punto entre times y minutos
-                display_flash_digits(board->screen, 2, 3, 50); // Parpadean las times
-                if(digital_input_get_is_active(board->increment)){
-                    key->inactivo = 0; // Reinicia el contador de inactividad
-                    time_increments(&time, modo);
-                }
-                if(digital_input_get_is_active(board->decrement)){
-                    key->inactivo = 0; // Reinicia el contador de inactividad
-                    time_decrement(&time, modo);                
-                }
-                if(digital_input_get_is_active(board->accept)){
-                    clock_set_time(reloj, &time);
-                    modo = MODO_NORMAL; // Sale del modo de ajuste de time
-                    key->inactivo = 0; // Reinicia el contador de inactividad
-
-                }
-            } 
-        for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
-                __asm("NOP");
-            }
-            screen_refresh(board->screen);
-        }
-    }
-*/
+    uint8_t inact=0;
     while (true) {
     divisor++;
 
     uint8_t hora[4] = { time.bcd[2], time.bcd[3], time.bcd[4], time.bcd[5] };
-
+    uint8_t hora_prueba[4] = { 1,2,3,4 };
     if (divisor == 5) {
         divisor = 0;
+        inact++;
+
         switch (modo)
         {
         case MODO_INVALIDO:
@@ -172,69 +100,143 @@ int main(void) {
         case MODO_SET_ALARMA_MINUTO:
         break;
         case MODO_NORMAL:
+            screen_add_point(board->screen, 2);
+            screen_write_BCD(board->screen, hora_prueba, 4);
+            break;
         break;
         }
-        get_mode(digital_was_activated(board->set_time), &modo, key, reloj, &time);
+        //get_mode(digital_was_activated(board->set_time), &modo, key, reloj, &time);
     }
-    
-    if (modo == MODO_INVALIDO) {
-        for(int i=0;i<3;i++){
-            hora[i]=0;
-        }
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);      
-    }
-    if (modo == MODO_NORMAL) {
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);
-    }
-    if(modo == MODO_SET_MINUTO){
-        
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);
-        
-        if(digital_input_get_is_active(board->accept)){
-            key->inactivo=0;
-            modo=MODO_SET_HORA;
-        }
-        if(digital_input_get_is_active(board->increment)){
-            key->inactivo=0;
-            time_increments(&time,modo);
-        }
-        if(digital_input_get_is_active(board->decrement)){
-            key->inactivo=0;
-            time_decrement(&time,modo);
-        }
-        
-    }
-    if(digital_input_get_is_active(board->cancel)||key->inactivo>30){
+    if(digital_was_activated(board->cancel) || inact > 30){
+        inact = 0;
         if(clock_time_is_valid(reloj)){
             modo=MODO_NORMAL;
         }else{
             modo=MODO_INVALIDO;
         }
     }
-    if(modo==MODO_SET_HORA){
+    if(digital_was_activated(board->set_time)||modo==MODO_SET_MINUTO){
+        modo=MODO_SET_MINUTO;
+        inact=0;
         screen_write_BCD(board->screen, hora, 4);
         screen_add_point(board->screen, 2);
-        if(digital_input_get_is_active(board->increment)){
-            key->inactivo=0;
-            time_increments(&time,modo);
+
+        if (digital_was_activated(board->accept)) {
+            inact = 0;
+            modo = MODO_SET_HORA;
         }
-        if(digital_input_get_is_active(board->decrement)){
-            key->inactivo=0;
-            time_decrement(&time,modo);
+
+        if (digital_was_activated(board->increment)) {
+            inact = 0;
+            time_increments(&time, modo);
         }
-        if(digital_input_get_is_active(board->accept)){
-            key->inactivo=0;
-            validate_time(reloj,&time);
-            if(clock_time_is_valid(reloj)){
-                modo=MODO_NORMAL;
+
+        if (digital_was_activated(board->decrement)) {
+            inact = 0;
+            time_decrement(&time, modo);
+        }
+    }
+    if(modo==MODO_SET_HORA&&modo!=MODO_NORMAL){
+        screen_write_BCD(board->screen, hora, 4);
+        screen_add_point(board->screen, 2);
+
+        if (digital_was_activated(board->accept)) {
+            inact = 0;
+            validate_time(reloj, &time);
+            
+            if (clock_time_is_valid(reloj)) {
+                modo = MODO_NORMAL;
+
             }
         }
-        
+
+        if (digital_was_activated(board->increment)) {
+            inact = 0;
+            time_increments(&time, modo);
+        }
+
+        if (digital_was_activated(board->decrement)) {
+            inact = 0;
+            time_decrement(&time, modo);
+        }
     }
-    
+    if(modo==MODO_INVALIDO){
+        for (int i = 0; i < 4; i++) hora[i] = 0;
+        screen_write_BCD(board->screen, hora, 4);
+        screen_add_point(board->screen, 2);
+
+    }
+    if(modo==MODO_NORMAL){
+        screen_write_BCD(board->screen, hora_prueba, 4);
+        screen_add_point(board->screen, 2);
+    }
+    /*
+    if(digital_was_activated(board->cancel)||inact>30){
+        inact=0;
+        if(clock_time_is_valid(reloj)){
+            modo=MODO_NORMAL;
+        }else{
+            modo=MODO_INVALIDO;
+        }
+    }
+    // Lógica por modo
+        switch (modo) {
+            case MODO_INVALIDO:
+                for (int i = 0; i < 4; i++) hora[i] = 0;
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2);
+                break;
+
+            case MODO_NORMAL:
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2);
+                break;
+
+            case MODO_SET_MINUTO:
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2);
+
+                if (digital_was_activated(board->accept)) {
+                    key->inactivo = 0;
+                    modo = MODO_SET_HORA;
+                }
+
+                if (digital_was_activated(board->increment)) {
+                    key->inactivo = 0;
+                    time_increments(&time, modo);
+                }
+
+                if (digital_was_activated(board->decrement)) {
+                    key->inactivo = 0;
+                    time_decrement(&time, modo);
+                }
+                break;
+
+            case MODO_SET_HORA:
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2);
+
+                if (digital_was_activated(board->accept)) {
+                    key->inactivo = 0;
+                    validate_time(reloj, &time);
+                    if (clock_time_is_valid(reloj)) {
+                        modo = MODO_NORMAL;
+                    }
+                }
+
+                if (digital_was_activated(board->increment)) {
+                    key->inactivo = 0;
+                    time_increments(&time, modo);
+                }
+
+                if (digital_was_activated(board->decrement)) {
+                    key->inactivo = 0;
+                    time_decrement(&time, modo);
+                }
+                break;
+
+        }
+    */
     // Refresco de display respetando los 2 for
     for (int index = 0; index < 100; index++) {
         for (int delay = 0; delay < 20000; delay++) {
