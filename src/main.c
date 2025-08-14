@@ -85,14 +85,12 @@ int main(void) {
     while (true) {
         clock_new_tick(reloj);// incrementa el tick del reloj
         divisor++;
-        uint8_t hora_prueba[4] = {0, 0, 0, 0};
         uint8_t hora[4] = { time.bcd[2], time.bcd[3], time.bcd[4], time.bcd[5] };
         uint8_t hora_alarma[4] = { tiempo_alarma.bcd[2], tiempo_alarma.bcd[3], tiempo_alarma.bcd[4], tiempo_alarma.bcd[5] };
         // Cada segundo, solo activa flag de parpadeo
         if (divisor == 5) {
             divisor = 0;
             inact++;
-            cont++;
             parpadeo_activo = true;
 
         } else {
@@ -107,17 +105,11 @@ int main(void) {
                 modo=MODO_INVALIDO;
             }
         }
-        if(digital_was_activated(board->set_alarm)){
-            inact=0;
-            if(cont>3){
-                cont=0;
-                modo=MODO_SET_ALARMA_MINUTO;
-            }
-        }
     
         if(digital_input_get_is_active(board->set_time)){
             inact=0;
-            if(cont>3){
+            cont++;
+            if(cont>15){
                 cont=0;
                 modo=MODO_SET_MINUTO;
             }
@@ -147,7 +139,6 @@ int main(void) {
                     inact=0;
                     modo = MODO_SET_HORA;
                 }
-                
                 break;
 
             case MODO_SET_HORA:
@@ -179,24 +170,89 @@ int main(void) {
                 hora[3] = time.bcd[5];
                 screen_write_BCD(board->screen, hora, 4);
                 screen_add_point(board->screen, 2);
-                if(digital_was_activated(board->set_alarm)){
+                if(digital_input_get_is_active(board->set_alarm)){
                     inact=0;
-                    if(cont>3){
+                    cont++;
+                    if(cont>15){
                         cont=0;
                         modo=MODO_SET_ALARMA_MINUTO;
                     }
                 }
                 //*****************
+                if(clock_is_alarm_enabled(reloj)){
+                    screen_add_point(board->screen,0);
+                }
+                if(clock_alarm_triggered(reloj)){
+                    if(digital_was_activated(board->cancel)){
+                        alarma=ALARMA_INACTIVA;
+                    }else{
+                        alarma= ALARMA_ACTIVA;
+                    }
+
+                }
                 
             break;
             case MODO_SET_ALARMA_MINUTO:
                 if (parpadeo_activo) display_flash_digits(board->screen, 0, 1, 50);
-                for(int i; i < 4; i++) screen_add_point(board->screen, i);
-                screen_write_BCD(board->screen, hora_prueba, 4);
+                screen_write_BCD(board->screen, hora_alarma, 4);
+                for(int i=0;i<4;i++)screen_add_point(board->screen, i);
+                if(digital_was_activated(board->increment)){
+                    inact=0;
+                    time_increments(&tiempo_alarma,modo);
+                }
+                if(digital_was_activated(board->decrement)){
+                    inact=0;
+                    time_decrement(&tiempo_alarma,modo);
+                }
+                if(digital_was_activated(board->accept)){
+                    inact=0;
+                    modo = MODO_SET_ALARMA_HORA;
+                }
             break;
             case MODO_SET_ALARMA_HORA:
+                if (parpadeo_activo) display_flash_digits(board->screen, 2, 3, 50);
+                screen_write_BCD(board->screen, hora_alarma, 4);
+                for(int i=0;i<4;i++)screen_add_point(board->screen, i);
+                if(digital_was_activated(board->increment)){
+                    inact=0;
+                    time_increments(&tiempo_alarma, modo);
+                }
+                if(digital_was_activated(board->decrement)){
+                    inact=0;
+                    time_decrement(&tiempo_alarma, modo);
+                }
+                if(digital_was_activated(board->accept)){
+                    inact=0;
+                    modo = MODO_NORMAL;
+                    clock_set_alarm_time(reloj, &tiempo_alarma);
+                    clock_enable_alarm(reloj);
+                    alarma = ALARMA_SETEADA;
+                }
+            break;
+        }
+        switch(alarma){
+            case ALARMA_SETEADA:
+            break;
+            case ALARMA_ACTIVA:
+                digital_output_activate(board->buzzer);
+                if(digital_was_activated(board->accept)){
+                    alarma=ALARMA_POSPUESTA;
+                }
+                if(digital_was_activated(board->cancel)){
+                    alarma=ALARMA_INACTIVA;
+                }
+            break;
+            case ALARMA_POSPUESTA:
+                clock_snooze_alarm(reloj,5);
+                digital_output_deactivate(board->buzzer);
                 
-                
+            break;
+            case ALARMA_INACTIVA:
+                digital_output_deactivate(board->buzzer);
+                clock_disable_alarm(reloj);
+                if(hora[0]==0 && hora[1]==0 && hora[2]==0 && hora[3]==0){
+                    alarma=ALARMA_SETEADA;
+                }
             break;
         }
         

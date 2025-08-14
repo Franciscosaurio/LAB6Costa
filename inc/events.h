@@ -48,6 +48,7 @@ typedef enum {
 } modo_t;
 
 typedef enum{
+    ALARMA_SETEADA,
     ALARMA_ACTIVA,
     ALARMA_POSPUESTA,
     ALARMA_INACTIVA,
