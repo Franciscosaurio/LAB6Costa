@@ -60,192 +60,155 @@
 
 int main(void) {
     // Inicialización de hardware
-    modo_t modo=modo_create();
-    key_t key=key_create();
+    modo_t modo = modo_create();
     board_t board = board_create();
-    clock_t reloj = clock_create(TICKS_PER_SECOND); // Crea el reloj con una estimación de 5 actualizaciones por segundo
-    clock_time_t time={
-        .time={
-            .seconds={0,0},//Su,Sd
-            .minutes={0,0},//Mu,Md
-            .hours={0,0},//Hu,Hd
+    clock_t reloj = clock_create(TICKS_PER_SECOND);
+    alarma_t alarma = ALARMA_INACTIVA;
+    clock_time_t time = {
+        .time = {
+            .seconds = {0, 0}, // Su, Sd
+            .minutes = {0, 0}, // Mu, Md
+            .hours   = {0, 0}, // Hu, Hd
         }
-    }; // Inicializa la estructura de tiempo
-    // Valores a mostrar
-    
+    };
+    clock_time_t tiempo_alarma = {
+        .time = {
+            .seconds = {0, 0}, // Su, Sd
+            .minutes = {0, 0}, // Mu, Md
+            .hours   = {0, 0}, // Hu, Hd
+        }
+    };
+    bool parpadeo_activo;
+    uint8_t inact = 0,cont=0;
     int divisor = 0;
-    uint8_t inact=0;
+
     while (true) {
-    divisor++;
+        clock_new_tick(reloj);// incrementa el tick del reloj
+        divisor++;
+        uint8_t hora_prueba[4] = {0, 0, 0, 0};
+        uint8_t hora[4] = { time.bcd[2], time.bcd[3], time.bcd[4], time.bcd[5] };
+        uint8_t hora_alarma[4] = { tiempo_alarma.bcd[2], tiempo_alarma.bcd[3], tiempo_alarma.bcd[4], tiempo_alarma.bcd[5] };
+        // Cada segundo, solo activa flag de parpadeo
+        if (divisor == 5) {
+            divisor = 0;
+            inact++;
+            cont++;
+            parpadeo_activo = true;
 
-    uint8_t hora[4] = { time.bcd[2], time.bcd[3], time.bcd[4], time.bcd[5] };
-    uint8_t hora_prueba[4] = { 1,2,3,4 };
-    if (divisor == 5) {
-        divisor = 0;
-        inact++;
-
-        switch (modo)
-        {
-        case MODO_INVALIDO:
-            display_flash_digits(board->screen, 0, 3, 50);
-            break;
-        case MODO_SET_MINUTO:
-            display_flash_digits(board->screen, 0, 1, 50);
-        break;
-        case MODO_SET_HORA:
-            display_flash_digits(board->screen, 2, 3, 50);
-        break;
-        case MODO_SET_ALARMA_HORA:
-        break;
-        case MODO_SET_ALARMA_MINUTO:
-        break;
-        case MODO_NORMAL:
-            screen_add_point(board->screen, 2);
-            screen_write_BCD(board->screen, hora_prueba, 4);
-            break;
-        break;
+        } else {
+            parpadeo_activo = false;
         }
-        //get_mode(digital_was_activated(board->set_time), &modo, key, reloj, &time);
-    }
-    if(digital_was_activated(board->cancel) || inact > 30){
-        inact = 0;
-        if(clock_time_is_valid(reloj)){
-            modo=MODO_NORMAL;
-        }else{
-            modo=MODO_INVALIDO;
-        }
-    }
-    if(digital_was_activated(board->set_time)||modo==MODO_SET_MINUTO){
-        modo=MODO_SET_MINUTO;
-        inact=0;
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);
-
-        if (digital_was_activated(board->accept)) {
-            inact = 0;
-            modo = MODO_SET_HORA;
-        }
-
-        if (digital_was_activated(board->increment)) {
-            inact = 0;
-            time_increments(&time, modo);
-        }
-
-        if (digital_was_activated(board->decrement)) {
-            inact = 0;
-            time_decrement(&time, modo);
-        }
-    }
-    if(modo==MODO_SET_HORA&&modo!=MODO_NORMAL){
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);
-
-        if (digital_was_activated(board->accept)) {
-            inact = 0;
-            validate_time(reloj, &time);
-            
-            if (clock_time_is_valid(reloj)) {
-                modo = MODO_NORMAL;
-
+        if(digital_was_activated(board->cancel)||inact>30){
+            inact=0;
+            clock_get_time(reloj, &time);
+            if(clock_time_is_valid(reloj)){
+                modo=MODO_NORMAL;
+            }else{
+                modo=MODO_INVALIDO;
             }
         }
-
-        if (digital_was_activated(board->increment)) {
-            inact = 0;
-            time_increments(&time, modo);
+        if(digital_was_activated(board->set_alarm)){
+            inact=0;
+            if(cont>3){
+                cont=0;
+                modo=MODO_SET_ALARMA_MINUTO;
+            }
         }
-
-        if (digital_was_activated(board->decrement)) {
-            inact = 0;
-            time_decrement(&time, modo);
+    
+        if(digital_input_get_is_active(board->set_time)){
+            inact=0;
+            if(cont>3){
+                cont=0;
+                modo=MODO_SET_MINUTO;
+            }
         }
-    }
-    if(modo==MODO_INVALIDO){
-        for (int i = 0; i < 4; i++) hora[i] = 0;
-        screen_write_BCD(board->screen, hora, 4);
-        screen_add_point(board->screen, 2);
-
-    }
-    if(modo==MODO_NORMAL){
-        screen_write_BCD(board->screen, hora_prueba, 4);
-        screen_add_point(board->screen, 2);
-    }
-    /*
-    if(digital_was_activated(board->cancel)||inact>30){
-        inact=0;
-        if(clock_time_is_valid(reloj)){
-            modo=MODO_NORMAL;
-        }else{
-            modo=MODO_INVALIDO;
-        }
-    }
-    // Lógica por modo
+        // Dibujo de pantalla según modo
         switch (modo) {
             case MODO_INVALIDO:
+                if (parpadeo_activo) display_flash_digits(board->screen, 0, 3, 50);
                 for (int i = 0; i < 4; i++) hora[i] = 0;
                 screen_write_BCD(board->screen, hora, 4);
                 screen_add_point(board->screen, 2);
                 break;
 
-            case MODO_NORMAL:
-                screen_write_BCD(board->screen, hora, 4);
-                screen_add_point(board->screen, 2);
-                break;
-
             case MODO_SET_MINUTO:
+                if (parpadeo_activo) display_flash_digits(board->screen, 0, 1, 50);
                 screen_write_BCD(board->screen, hora, 4);
                 screen_add_point(board->screen, 2);
-
-                if (digital_was_activated(board->accept)) {
-                    key->inactivo = 0;
-                    modo = MODO_SET_HORA;
-                }
-
-                if (digital_was_activated(board->increment)) {
-                    key->inactivo = 0;
+                if(digital_was_activated(board->increment)){
+                    inact=0;
                     time_increments(&time, modo);
                 }
-
-                if (digital_was_activated(board->decrement)) {
-                    key->inactivo = 0;
+                if(digital_was_activated(board->decrement)){
+                    inact=0;
                     time_decrement(&time, modo);
                 }
+                if(digital_was_activated(board->accept)){
+                    inact=0;
+                    modo = MODO_SET_HORA;
+                }
+                
                 break;
 
             case MODO_SET_HORA:
+                if (parpadeo_activo) display_flash_digits(board->screen, 2, 3, 50);
                 screen_write_BCD(board->screen, hora, 4);
                 screen_add_point(board->screen, 2);
-
-                if (digital_was_activated(board->accept)) {
-                    key->inactivo = 0;
-                    validate_time(reloj, &time);
-                    if (clock_time_is_valid(reloj)) {
-                        modo = MODO_NORMAL;
-                    }
-                }
-
-                if (digital_was_activated(board->increment)) {
-                    key->inactivo = 0;
+                if(digital_was_activated(board->increment)){
+                    inact=0;
                     time_increments(&time, modo);
                 }
-
-                if (digital_was_activated(board->decrement)) {
-                    key->inactivo = 0;
+                if(digital_was_activated(board->decrement)){
+                    inact=0;
                     time_decrement(&time, modo);
+                }
+                if(digital_was_activated(board->accept)){
+                    inact=0;
+                    modo = MODO_NORMAL;
+                    clock_set_time(reloj, &time);
                 }
                 break;
 
+            case MODO_NORMAL:
+
+                display_flash_digits(board->screen, 0, 0, 0);
+                clock_get_time(reloj, &time);
+                hora[0] = time.bcd[2];
+                hora[1] = time.bcd[3];
+                hora[2] = time.bcd[4];
+                hora[3] = time.bcd[5];
+                screen_write_BCD(board->screen, hora, 4);
+                screen_add_point(board->screen, 2);
+                if(digital_was_activated(board->set_alarm)){
+                    inact=0;
+                    if(cont>3){
+                        cont=0;
+                        modo=MODO_SET_ALARMA_MINUTO;
+                    }
+                }
+                //*****************
+                
+            break;
+            case MODO_SET_ALARMA_MINUTO:
+                if (parpadeo_activo) display_flash_digits(board->screen, 0, 1, 50);
+                for(int i; i < 4; i++) screen_add_point(board->screen, i);
+                screen_write_BCD(board->screen, hora_prueba, 4);
+            break;
+            case MODO_SET_ALARMA_HORA:
+                
+                
+            break;
         }
-    */
-    // Refresco de display respetando los 2 for
-    for (int index = 0; index < 100; index++) {
-        for (int delay = 0; delay < 20000; delay++) {
-            __asm("NOP");
+        
+        for (int index = 0; index < 100; index++) {
+            for (int delay = 0; delay < 2000; delay++) {//cambiar a 20K el delay que está en 2K
+                __asm("NOP");
+            }
+            screen_refresh(board->screen);
         }
-        screen_refresh(board->screen);
     }
 }
-}
+
 
 
 /* === End of documentation ==================================================================== */

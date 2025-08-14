@@ -84,8 +84,6 @@ bool clock_set_time(clock_t self, const clock_time_t *new_time){
     return self->valid;
 }
 
-
-
 static void bcd_increment(clock_time_t *time) {
     //esta funcion incrementa el tiempo en formato BCD
     // Si estamos en 23:59:59

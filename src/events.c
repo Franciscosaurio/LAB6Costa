@@ -43,14 +43,14 @@ modo_t modo_create(void) {
 }
 
 void time_increments(clock_time_t *time, modo_t modo) {
-    if (modo == MODO_SET_MINUTO) {
+    if (modo == MODO_SET_MINUTO|| modo == MODO_SET_ALARMA_MINUTO) {
         if (++time->bcd[2] > 9) {  // Mu (hora[0])
             time->bcd[2] = 0;
             if (++time->bcd[3] > 5) {  // Md (hora[1])
                 time->bcd[3] = 0;
             }
         }
-    } else if (modo == MODO_SET_HORA) {
+    } else if (modo == MODO_SET_HORA|| modo == MODO_SET_ALARMA_HORA) {
         // Convertir a valor entero para facilitar control de límite 23
         uint8_t horas = time->bcd[5] * 10 + time->bcd[4];
         horas = (horas + 1) % 24;
@@ -60,7 +60,7 @@ void time_increments(clock_time_t *time, modo_t modo) {
 }
 
 void time_decrement(clock_time_t *time, modo_t modo) {
-    if (modo == MODO_SET_MINUTO) {
+    if (modo == MODO_SET_MINUTO|| modo == MODO_SET_ALARMA_MINUTO) {
         if (time->bcd[2] == 0) {  // Mu (hora[0])
             time->bcd[2] = 9;
             if (time->bcd[3] == 0) {  // Md (hora[1])
@@ -71,7 +71,7 @@ void time_decrement(clock_time_t *time, modo_t modo) {
         } else {
             time->bcd[2]--;
         }
-    } else if (modo == MODO_SET_HORA) {
+    } else if (modo == MODO_SET_HORA|| modo==MODO_SET_ALARMA_HORA) {
         uint8_t horas = time->bcd[5] * 10 + time->bcd[4];
         if (horas == 0) {
             horas = 23;
